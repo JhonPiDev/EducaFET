@@ -1,0 +1,93 @@
+<div class="bg-gray-100 min-h-screen">
+  <!-- Barra de Navegación Superior -->
+  <nav class="bg-white border-b border-gray-300 shadow-sm fixed w-full z-30">
+    <div class="flex justify-between items-center px-4 sm:px-6 py-4">
+      <div class="flex items-center">
+        <img src="icon.jpg" alt="Logo" class="w-10 h-10 sm:w-12 sm:h-12 mr-2 md:w-20 md:h-20" />
+        <h2 class="font-bold text-lg sm:text-xl text-gray-800 hidden sm:block">TRUCK SERVICES SAS</h2>
+      </div>
+
+      <div class="flex items-center space-x-3">
+  <!-- Texto del username -->
+  <p class="text-gray-900 font-semibold text-sm sm:text-base bg-gray-100 px-3 py-1 rounded-full shadow-sm">
+    Bienvenido, {{ username || 'Usuario' }}
+  </p>
+  
+  <!-- Botón de perfil con ícono -->
+  <button 
+    class="flex items-center justify-center w-10 h-10 bg-gradient-to-r from-cyan-500 to-blue-500 text-white rounded-full hover:from-cyan-600 hover:to-blue-600 focus:outline-none focus:ring-2 focus:ring-cyan-300 transition-all duration-300 shadow-md"
+    title="Perfil de usuario"
+  >
+    <i class="fas fa-user-circle text-xl"></i>
+  </button>
+</div>
+    </div>
+
+    <!-- Menú horizontal para pantallas pequeñas -->
+    <div class="flex flex-wrap justify-center lg:hidden border-t border-gray-200 px-2 py-3">
+      <a routerLink="/user/cliente" routerLinkActive="text-cyan-600 font-semibold"
+         class="px-3 py-2 text-sm text-gray-700 hover:text-cyan-500">Clientes</a>
+
+      <ng-container *ngIf="clienteSeleccionado">
+        <a routerLink="/user/ats" routerLinkActive="text-cyan-600 font-semibold"
+           class="px-3 py-2 text-sm text-gray-700 hover:text-cyan-500">Evaluación ATS</a>
+
+        <ng-container *ngIf="mostrarTodosBotones">
+          <a routerLink="/user/registro-pruebas" routerLinkActive="text-cyan-600 font-semibold"
+             class="px-3 py-2 text-sm text-gray-700 hover:text-cyan-500">Registro Pruebas</a>
+
+          <a routerLink="/user/historial-pruebas" routerLinkActive="text-cyan-600 font-semibold"
+             class="px-3 py-2 text-sm text-gray-700 hover:text-cyan-500">Historial Pruebas</a>
+
+          <a routerLink="/user/historial-ats" routerLinkActive="text-cyan-600 font-semibold"
+             class="px-3 py-2 text-sm text-gray-700 hover:text-cyan-500">Historial ATS</a>
+        </ng-container>
+      </ng-container>
+
+      <a (click)="logout()" class="px-3 py-2 text-sm text-red-500 hover:text-red-700">Cerrar Sesión</a>
+    </div>
+  </nav>
+
+  <!-- Menú lateral solo visible en escritorio -->
+  <aside class="hidden lg:block fixed top-0 left-0 h-full w-64 bg-white shadow-lg pt-24 z-10">
+    <div class="p-4 space-y-4">
+      <a routerLink="/user/cliente" routerLinkActive="bg-gradient-to-r from-sky-600 to-cyan-400 text-white"
+         class="px-4 py-3 flex items-center space-x-4 rounded-md text-gray-700 hover:bg-cyan-50 hover:text-cyan-600">
+        <i class="fas fa-file-alt"></i><span>Clientes</span>
+      </a>
+
+      <ng-container *ngIf="clienteSeleccionado">
+        <a routerLink="/user/ats" routerLinkActive="bg-gradient-to-r from-sky-600 to-cyan-400 text-white"
+           class="px-4 py-3 flex items-center space-x-4 rounded-md text-gray-700 hover:bg-cyan-50 hover:text-cyan-600">
+          <i class="fas fa-shield-alt"></i><span>Evaluación ATS</span>
+        </a>
+
+        <ng-container *ngIf="mostrarTodosBotones">
+          <a routerLink="/user/registro-pruebas" routerLinkActive="bg-gradient-to-r from-sky-600 to-cyan-400 text-white"
+             class="px-4 py-3 flex items-center space-x-4 rounded-md text-gray-700 hover:bg-cyan-50 hover:text-cyan-600">
+            <i class="fas fa-file-alt"></i><span>Registro Pruebas</span>
+          </a>
+
+          <a routerLink="/user/historial-pruebas" routerLinkActive="bg-gradient-to-r from-sky-600 to-cyan-400 text-white"
+             class="px-4 py-3 flex items-center space-x-4 rounded-md text-gray-700 hover:bg-cyan-50 hover:text-cyan-600">
+            <i class="fas fa-history"></i><span>Historial Pruebas</span>
+          </a>
+
+          <a routerLink="/user/historial-ats" routerLinkActive="bg-gradient-to-r from-sky-600 to-cyan-400 text-white"
+             class="px-4 py-3 flex items-center space-x-4 rounded-md text-gray-700 hover:bg-cyan-50 hover:text-cyan-600">
+            <i class="fas fa-history"></i><span>Historial ATS</span>
+          </a>
+        </ng-container>
+      </ng-container>
+
+      <a (click)="logout()" class="px-4 py-3 flex items-center space-x-4 rounded-md text-gray-700 hover:bg-red-50 hover:text-red-600">
+        <i class="fas fa-sign-out-alt text-red-500"></i><span>Cerrar Sesión</span>
+      </a>
+    </div>
+  </aside>
+
+  <!-- Contenido Principal -->
+  <main class="pt-[12rem] sm:pt-[6rem] lg:pt-[6rem] px-4 lg:ml-64 pb-8 transition-all duration-300">
+    <router-outlet></router-outlet>
+  </main>
+</div>

@@ -1,0 +1,123 @@
+<!-- landing.component.html -->
+<div class="min-h-screen bg-white">
+  <!-- Header -->
+  <header class="bg-white border-b border-gray-200">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between items-center h-16">
+        <div class="flex items-center">
+          <h1 class="text-xl font-bold text-gray-900">EducaFET</h1>
+        </div>
+        
+        <nav class="hidden md:flex space-x-8">
+          <a routerLink="/inicio" class="text-gray-700 hover:text-gray-900 cursor-pointer">Inicio</a>
+          <a routerLink="/sobre-fet" class="text-gray-700 hover:text-gray-900 cursor-pointer">Sobre la FET</a>
+          <a routerLink="/caracteristicas" class="text-gray-700 hover:text-gray-900 cursor-pointer">Características</a>
+          <a routerLink="/noticias" class="text-gray-700 hover:text-gray-900 cursor-pointer">Noticias</a>
+          <a routerLink="/faq" class="text-gray-700 hover:text-gray-900 cursor-pointer">FAQ</a>
+        </nav>
+
+        <div class="flex items-center space-x-4">
+          <button 
+            (click)="onLogin()" 
+            class="text-gray-700 hover:text-gray-900 transition">
+            Iniciar sesión
+          </button>
+          <button 
+            (click)="onRegister()" 
+            class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition">
+            Registrarse
+          </button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="hero-gradient text-white py-20">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="max-w-3xl">
+        <h2 class="text-5xl font-bold mb-4">Plataforma Educativa FET</h2>
+        <p class="text-xl mb-8">Aprende, crece y conecta con una experiencia LMS moderna.</p>
+        <div class="flex space-x-4">
+          <button 
+            (click)="onStartFree()" 
+            class="bg-white text-blue-600 px-6 py-3 rounded-md font-semibold hover:bg-gray-100 transition">
+            Comenzar Gratis
+          </button>
+          <button 
+            (click)="onShowDemo()" 
+            class="bg-white text-blue-600 px-6 py-3 rounded-md font-semibold hover:bg-gray-100 transition">
+            Ver Demo
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features Section -->
+  <section class="py-16 bg-gray-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <h3 class="text-3xl font-bold text-center mb-12 text-gray-900">¿Por qué EducaFET?</h3>
+      
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <!-- Feature Card -->
+        <div 
+          *ngFor="let feature of features" 
+          class="bg-white p-8 rounded-lg shadow-sm hover:shadow-md transition transform hover:-translate-y-1">
+          <div 
+            class="w-12 h-12 rounded-full flex items-center justify-center mb-4"
+            [ngClass]="feature.iconBgClass">
+            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path 
+                stroke-linecap="round" 
+                stroke-linejoin="round" 
+                stroke-width="2" 
+                [attr.d]="feature.iconPath" />
+            </svg>
+          </div>
+          <h4 class="text-xl font-bold mb-2 text-gray-900">{{ feature.title }}</h4>
+          <p class="text-gray-600">{{ feature.description }}</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Stats Section -->
+  <section class="bg-blue-600 py-16 text-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+        <div *ngFor="let stat of stats">
+          <div class="text-4xl font-bold mb-2">{{ stat.value }}</div>
+          <div class="text-blue-100">{{ stat.label }}</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="bg-gray-50 py-12">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div>
+          <h5 class="font-bold text-gray-900 mb-4">EducaFET</h5>
+          <p class="text-gray-600">Formación de excelencia para todos.</p>
+        </div>
+        <div>
+          <h5 class="font-bold text-gray-900 mb-4">Enlaces</h5>
+          <ul class="space-y-2">
+            <li><a routerLink="/sobre" class="text-gray-600 hover:text-gray-900 cursor-pointer">Sobre</a></li>
+            <li><a routerLink="/caracteristicas" class="text-gray-600 hover:text-gray-900 cursor-pointer">Características</a></li>
+            <li><a routerLink="/contacto" class="text-gray-600 hover:text-gray-900 cursor-pointer">Contacto</a></li>
+          </ul>
+        </div>
+        <div>
+          <h5 class="font-bold text-gray-900 mb-4">Contacto</h5>
+          <p class="text-gray-600">soporte&#64;educafet.org</p>
+        </div>
+      </div>
+      <div class="border-t border-gray-200 mt-8 pt-8 text-center text-gray-600">
+        <p>&copy; {{ currentYear }} EducaFET</p>
+      </div>
+    </div>
+  </footer>
+</div>
