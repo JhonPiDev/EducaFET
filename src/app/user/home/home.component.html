@@ -1,36 +1,153 @@
 <!-- landing.component.html -->
 <div class="min-h-screen bg-white">
   <!-- Header -->
-  <header class="bg-white border-b border-gray-200">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="flex justify-between items-center h-16">
-        <div class="flex items-center">
-          <h1 class="text-xl font-bold text-gray-900">EducaFET</h1>
-        </div>
-        
-        <nav class="hidden md:flex space-x-8">
-          <a routerLink="/inicio" class="text-gray-700 hover:text-gray-900 cursor-pointer">Inicio</a>
-          <a routerLink="/sobre-fet" class="text-gray-700 hover:text-gray-900 cursor-pointer">Sobre la FET</a>
-          <a routerLink="/caracteristicas" class="text-gray-700 hover:text-gray-900 cursor-pointer">Características</a>
-          <a routerLink="/noticias" class="text-gray-700 hover:text-gray-900 cursor-pointer">Noticias</a>
-          <a routerLink="/faq" class="text-gray-700 hover:text-gray-900 cursor-pointer">FAQ</a>
-        </nav>
+<header class="bg-white border-b border-gray-200 shadow-sm">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="flex justify-between items-center h-16">
+      <!-- Logo y nombre -->
+      <div class="flex items-center space-x-2">
+        <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+        </svg>
+        <h1 class="text-xl font-bold text-gray-900">EducaFET</h1>
+      </div>
+      
+      <!-- Navegación desktop -->
+      <nav class="hidden md:flex space-x-8">
+        <a routerLink="/inicio" 
+           routerLinkActive="text-blue-600 font-semibold"
+           class="text-gray-700 hover:text-blue-600 transition-colors cursor-pointer">
+          Inicio
+        </a>
+        <a routerLink="/sobre-fet" 
+           routerLinkActive="text-blue-600 font-semibold"
+           class="text-gray-700 hover:text-blue-600 transition-colors cursor-pointer">
+          Sobre la FET
+        </a>
+        <a routerLink="/caracteristicas" 
+           routerLinkActive="text-blue-600 font-semibold"
+           class="text-gray-700 hover:text-blue-600 transition-colors cursor-pointer">
+          Características
+        </a>
+        <a routerLink="/noticias" 
+           routerLinkActive="text-blue-600 font-semibold"
+           class="text-gray-700 hover:text-blue-600 transition-colors cursor-pointer">
+          Noticias
+        </a>
+        <a routerLink="/faq" 
+           routerLinkActive="text-blue-600 font-semibold"
+           class="text-gray-700 hover:text-blue-600 transition-colors cursor-pointer">
+          FAQ
+        </a>
+      </nav>
 
-        <div class="flex items-center space-x-4">
+      <!-- Botones de autenticación / Usuario -->
+      <div class="flex items-center space-x-4">
+        <!-- Si NO está logueado -->
+        <ng-container *ngIf="!userLoggedIn; else loggedIn">
           <button 
             (click)="onLogin()" 
-            class="text-gray-700 hover:text-gray-900 transition">
-            Iniciar sesión
+            class="flex items-center space-x-2 text-gray-700 hover:text-gray-900 transition-colors px-3 py-2 rounded-md hover:bg-gray-50">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"></path>
+            </svg>
+            <span>Iniciar sesión</span>
           </button>
           <button 
             (click)="onRegister()" 
-            class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition">
-            Registrarse
+            class="flex items-center space-x-2 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors shadow-sm">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path>
+            </svg>
+            <span>Registrarse</span>
           </button>
-        </div>
+        </ng-container>
+
+        <!-- Si SÍ está logueado -->
+        <ng-template #loggedIn>
+          <div class="flex items-center space-x-3">
+            <!-- Avatar con iniciales si no hay imagen -->
+            <div class="relative">
+              <img 
+                *ngIf="user?.avatar; else avatarPlaceholder" 
+                [src]="user?.avatar" 
+                alt="Avatar" 
+                class="w-10 h-10 rounded-full border-2 border-gray-200 object-cover" />
+              <ng-template #avatarPlaceholder>
+                <div class="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center text-white font-semibold">
+                  {{ getInitials(user?.name) }}
+                </div>
+              </ng-template>
+              <!-- Indicador de estado online -->
+              <span class="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full"></span>
+            </div>
+
+            <!-- Nombre del usuario -->
+            <div class="hidden sm:block">
+              <p class="text-sm text-gray-500">Hola,</p>
+              <p class="text-sm font-semibold text-gray-900">{{ user?.name || 'Usuario' }}</p>
+            </div>
+
+            <!-- Botón de cerrar sesión mejorado -->
+            <button 
+              (click)="logout()" 
+              class="flex items-center space-x-2 px-3 py-2 text-red-600 hover:text-white hover:bg-red-600 transition-all rounded-md border border-red-600 group">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+              </svg>
+              <span class="hidden sm:inline">Cerrar sesión</span>
+            </button>
+          </div>
+        </ng-template>
+
+        <!-- Botón hamburguesa para móvil -->
+        <button 
+          (click)="toggleMobileMenu()"
+          class="md:hidden flex items-center text-gray-700 hover:text-gray-900">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+          </svg>
+        </button>
       </div>
     </div>
-  </header>
+
+    <!-- Menú móvil -->
+    <div *ngIf="mobileMenuOpen" class="md:hidden py-4 border-t border-gray-200">
+      <nav class="flex flex-col space-y-3">
+        <a routerLink="/inicio" 
+           (click)="closeMobileMenu()"
+           routerLinkActive="text-blue-600 font-semibold bg-blue-50"
+           class="text-gray-700 hover:text-blue-600 hover:bg-gray-50 px-3 py-2 rounded-md transition-colors cursor-pointer">
+          Inicio
+        </a>
+        <a routerLink="/sobre-fet" 
+           (click)="closeMobileMenu()"
+           routerLinkActive="text-blue-600 font-semibold bg-blue-50"
+           class="text-gray-700 hover:text-blue-600 hover:bg-gray-50 px-3 py-2 rounded-md transition-colors cursor-pointer">
+          Sobre la FET
+        </a>
+        <a routerLink="/caracteristicas" 
+           (click)="closeMobileMenu()"
+           routerLinkActive="text-blue-600 font-semibold bg-blue-50"
+           class="text-gray-700 hover:text-blue-600 hover:bg-gray-50 px-3 py-2 rounded-md transition-colors cursor-pointer">
+          Características
+        </a>
+        <a routerLink="/noticias" 
+           (click)="closeMobileMenu()"
+           routerLinkActive="text-blue-600 font-semibold bg-blue-50"
+           class="text-gray-700 hover:text-blue-600 hover:bg-gray-50 px-3 py-2 rounded-md transition-colors cursor-pointer">
+          Noticias
+        </a>
+        <a routerLink="/faq" 
+           (click)="closeMobileMenu()"
+           routerLinkActive="text-blue-600 font-semibold bg-blue-50"
+           class="text-gray-700 hover:text-blue-600 hover:bg-gray-50 px-3 py-2 rounded-md transition-colors cursor-pointer">
+          FAQ
+        </a>
+      </nav>
+    </div>
+  </div>
+</header>
 
   <!-- Hero Section -->
   <section class="hero-gradient text-white py-20">

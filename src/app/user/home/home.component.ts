@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
+import { AuthService, User } from '../../services/auth.service';
 
 interface Feature {
   title: string;
@@ -19,10 +20,13 @@ interface Stat {
   standalone: true,
   imports: [CommonModule],
   templateUrl: './home.component.html',
-  styleUrl: './home.component.scss'
+  styleUrls: ['./home.component.scss']
 })
 export class HomeComponent implements OnInit {
   currentYear: number = new Date().getFullYear();
+  userLoggedIn: boolean = false;
+  user: User | null = null;
+  mobileMenuOpen: boolean = false; // ✅ control del menú móvil
 
   features: Feature[] = [
     {
@@ -52,29 +56,59 @@ export class HomeComponent implements OnInit {
     { value: '95%', label: 'Satisfacción' }
   ];
 
-  constructor(private router: Router) {}
+  constructor(private router: Router, private authService: AuthService) {}
 
   ngOnInit(): void {
-    // Inicialización del componente
+    this.userLoggedIn = this.authService.isAuthenticated();
+    if (this.userLoggedIn) {
+      this.user = this.authService.getCurrentUser();
+    }
+
+    this.authService.currentUser.subscribe(user => {
+      this.user = user;
+      this.userLoggedIn = !!user;
+    });
   }
 
   onLogin(): void {
-    console.log('Navegando a login...');
     this.router.navigate(['/login']);
   }
 
   onRegister(): void {
-    console.log('Navegando a registro...');
     this.router.navigate(['/register']);
   }
 
   onStartFree(): void {
-    console.log('Iniciando prueba gratuita...');
     this.router.navigate(['/register'], { queryParams: { plan: 'free' } });
   }
 
   onShowDemo(): void {
-    console.log('Mostrando demo...');
     this.router.navigate(['/demo']);
+  }
+
+  logout(): void {
+    this.authService.logout();
+    this.user = null;
+    this.userLoggedIn = false;
+    this.router.navigate(['/inicio']);
+  }
+
+  // ✅ Iniciales para avatar
+  getInitials(name?: string): string {
+    if (!name) return '?';
+    return name
+      .split(' ')
+      .map(n => n[0])
+      .join('')
+      .toUpperCase();
+  }
+
+  // ✅ Control menú móvil
+  toggleMobileMenu(): void {
+    this.mobileMenuOpen = !this.mobileMenuOpen;
+  }
+
+  closeMobileMenu(): void {
+    this.mobileMenuOpen = false;
   }
 }
