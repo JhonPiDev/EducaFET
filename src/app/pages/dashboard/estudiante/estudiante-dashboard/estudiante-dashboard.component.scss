@@ -1,0 +1,71 @@
+/* === Estilos globales para notificaciones y errores === */
+
+/* Contenedor de toast */
+.toast-container {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  z-index: 1055;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+/* Cada toast individual */
+.toast {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-width: 280px;
+  max-width: 400px;
+  background-color: #2b2b2b;
+  color: #fff;
+  padding: 1rem 1.25rem;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  font-size: 0.95rem;
+  font-weight: 500;
+  animation: fadeIn 0.4s ease, fadeOut 0.4s ease 4.5s forwards;
+}
+
+/* Ícono del toast */
+.toast-icon {
+  margin-right: 0.75rem;
+  font-size: 1.3rem;
+}
+
+/* Tipos de mensaje */
+.toast-success {
+  background-color: #2e7d32; /* verde */
+}
+
+.toast-error {
+  background-color: #c62828; /* rojo */
+}
+
+.toast-warning {
+  background-color: #ed6c02; /* naranja */
+}
+
+.toast-info {
+  background-color: #0277bd; /* azul */
+}
+
+/* Animaciones */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeOut {
+  to {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+}

@@ -1,15 +1,21 @@
 import { Routes } from '@angular/router';
-import { LoginComponent } from './login/login.component';
-import { HomeComponent } from './user/home/home.component';
-import { RegisterComponent } from './user/register/register.component';
-
-
+import { LoginComponent } from './pages/login/login.component';
+import { HomeComponent } from './pages/home/home.component';
+import { RegisterComponent } from './pages/register/register.component';
+import { EstudianteDashboardComponent } from './pages/dashboard/estudiante/estudiante-dashboard/estudiante-dashboard.component';
 
 export const routes: Routes = [
-  { path: '', redirectTo: '/home', pathMatch: 'full' }, // Ruta por defecto
-  { path: 'login', component: LoginComponent }, 
-  { path: 'home', component: HomeComponent },
-  { path: 'register', component: RegisterComponent },
-  { path: '**', redirectTo: '/login' }, // Ruta comodín para redirigir a login si no existe la ruta
+  // Ruta principal - home
+  { path: '', redirectTo: '/home', pathMatch: 'full' },
 
+  // Páginas públicas
+  { path: 'home', component: HomeComponent },
+  { path: 'login', component: LoginComponent },
+  { path: 'register', component: RegisterComponent },
+
+  // Dashboard del estudiante
+  { path: 'dashboard/estudiante', component: EstudianteDashboardComponent },
+
+  // Ruta comodín - debe ir siempre al final
+  { path: '**', redirectTo: '/login' }
 ];

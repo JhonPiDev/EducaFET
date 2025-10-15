@@ -1,17 +1,21 @@
-import { ApplicationConfig, isDevMode } from '@angular/core';
+// app.config.ts
+import { ApplicationConfig } from '@angular/core';
 import { provideRouter } from '@angular/router';
-import { provideHttpClient } from '@angular/common/http';
 import { routes } from './app.routes';
-import { HttpClientModule } from '@angular/common/http';
-import { provideServiceWorker } from '@angular/service-worker';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { provideAnimations } from '@angular/platform-browser/animations';
+import { HTTP_INTERCEPTORS } from '@angular/common/http';
 
+import { AuthInterceptor, ErrorInterceptor } from './interceptors'; // ✅ importa desde index.ts
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideRouter(routes),
-    provideHttpClient(), provideServiceWorker('ngsw-worker.js', {
-            enabled: !isDevMode(),
-            registrationStrategy: 'registerWhenStable:30000'
-          }),
-  ],
+    provideAnimations(),
+    provideHttpClient(withInterceptorsFromDi()),
+
+    // 🔹 Interceptores registrados correctamente
+    { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },
+    { provide: HTTP_INTERCEPTORS, useClass: ErrorInterceptor, multi: true }
+  ]
 };
