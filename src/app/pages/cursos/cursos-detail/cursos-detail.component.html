@@ -1,0 +1,138 @@
+<div class="min-h-screen bg-gray-50">
+  <!-- Loading -->
+  <div *ngIf="loading" class="flex items-center justify-center min-h-screen">
+    <div class="text-center">
+      <div class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      <p class="mt-4 text-gray-600">Cargando curso...</p>
+    </div>
+  </div>
+
+  <!-- Course Detail -->
+  <div *ngIf="!loading && course">
+    <!-- Hero Section -->
+    <div class="bg-gradient-to-br from-blue-600 to-purple-600 text-white">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <button 
+          routerLink="/cursos"
+          class="mb-6 flex items-center text-white hover:text-gray-200 transition">
+          <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                  d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+          </svg>
+          Volver a cursos
+        </button>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <!-- Course Info -->
+          <div class="lg:col-span-2">
+            <div class="flex items-center gap-2 mb-4">
+              <span class="px-3 py-1 bg-white/20 backdrop-blur rounded-full text-sm">
+                {{ course.category }}
+              </span>
+              <span class="px-3 py-1 bg-white/20 backdrop-blur rounded-full text-sm">
+                {{ course.level }}
+              </span>
+            </div>
+
+            <h1 class="text-4xl font-bold mb-4">{{ course.name }}</h1>
+            <p class="text-lg text-blue-100 mb-6">{{ course.description }}</p>
+
+            <div class="flex flex-wrap gap-6 text-sm">
+              <div class="flex items-center">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                        d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                </svg>
+                <span>{{ course.teacher }}</span>
+              </div>
+              <div class="flex items-center">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                <span>{{ course.duration }}</span>
+              </div>
+              <div class="flex items-center">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                        d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                </svg>
+                <span>{{ course.schedule }}</span>
+              </div>
+              <div class="flex items-center">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                        d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
+                </svg>
+                <span>{{ course.students }} estudiantes</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Enrollment Card -->
+          <div class="lg:col-span-1">
+            <div class="bg-white rounded-lg shadow-lg p-6 text-gray-900">
+              <div class="text-center mb-6">
+                <div class="text-3xl font-bold mb-2">Gratis</div>
+                <p class="text-sm text-gray-600">Acceso completo al curso</p>
+              </div>
+
+              <button
+                (click)="enrollCourse()"
+                class="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition font-semibold mb-4">
+                Inscribirse Ahora
+              </button>
+
+              <div class="space-y-3 text-sm">
+                <div class="flex items-center text-gray-600">
+                  <svg class="w-5 h-5 mr-2 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                  </svg>
+                  <span>Acceso de por vida</span>
+                </div>
+                <div class="flex items-center text-gray-600">
+                  <svg class="w-5 h-5 mr-2 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                  </svg>
+                  <span>Certificado al finalizar</span>
+                </div>
+                <div class="flex items-center text-gray-600">
+                  <svg class="w-5 h-5 mr-2 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                  </svg>
+                  <span>Material descargable</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Lessons Section -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <h2 class="text-2xl font-bold text-gray-900 mb-6">Lecciones del curso</h2>
+
+      <div *ngIf="lessons.length === 0" class="text-gray-500 text-sm">
+        No hay lecciones disponibles aún.
+      </div>
+
+      <div class="space-y-4">
+        <div *ngFor="let lesson of lessons" class="bg-white rounded-lg shadow-sm p-5 hover:shadow-md transition">
+          <div class="flex items-center justify-between">
+            <div>
+              <h3 class="text-lg font-semibold text-gray-900">{{ lesson.title }}</h3>
+              <p class="text-sm text-gray-600">{{ lesson.description }}</p>
+            </div>
+            <a 
+              [href]="lesson.content"
+              target="_blank"
+              class="text-blue-600 hover:text-blue-800 text-sm font-semibold">
+              Ver contenido →
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

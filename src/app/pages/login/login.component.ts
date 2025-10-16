@@ -150,7 +150,7 @@ private redirectToDashboard(role: string): void {
   switch (role) {
     case 'estudiante':
     case 'student':
-      this.router.navigate(['/dashboard/estudiante']);
+      this.router.navigate(['/home']);
       break;
     case 'docente':
     case 'teacher':
