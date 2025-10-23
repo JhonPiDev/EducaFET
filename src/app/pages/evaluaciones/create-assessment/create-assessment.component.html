@@ -1,0 +1,280 @@
+<div class="min-h-screen bg-gray-50">
+      <!-- Header -->
+      <header class="bg-white shadow-sm border-b border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          <div class="flex justify-between items-center">
+            <div>
+              <h1 class="text-2xl font-bold text-gray-900">Crear Evaluación</h1>
+              <p class="text-gray-600">Define las preguntas y configuración</p>
+            </div>
+            <button 
+              routerLink="/dashboard/docente"
+              class="px-4 py-2 text-gray-600 hover:bg-gray-50 border border-gray-300 rounded-lg transition">
+              Cancelar
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <!-- Main Content -->
+      <main class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <form [formGroup]="assessmentForm" (ngSubmit)="onSubmit()">
+          
+          <!-- Información Básica -->
+          <div class="bg-white rounded-lg shadow-sm p-6 mb-6">
+            <h2 class="text-xl font-bold text-gray-900 mb-6">Información Básica</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <!-- Título -->
+              <div class="md:col-span-2">
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                  Título de la Evaluación *
+                </label>
+                <input
+                  type="text"
+                  formControlName="title"
+                  placeholder="Ej: Quiz 1: Introducción al Cálculo"
+                  class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none">
+                <p *ngIf="assessmentForm.get('title')?.invalid && assessmentForm.get('title')?.touched" 
+                   class="mt-1 text-sm text-red-600">
+                  El título es requerido
+                </p>
+              </div>
+
+              <!-- Curso -->
+              <div class="md:col-span-2">
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                  Curso *
+                </label>
+                <select
+                  formControlName="course_id"
+                  class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none">
+                  <option value="">Selecciona un curso</option>
+                  <option *ngFor="let course of courses" [value]="course.id">
+                    {{ course.name }}
+                  </option>
+                </select>
+                <p *ngIf="assessmentForm.get('course_id')?.invalid && assessmentForm.get('course_id')?.touched" 
+                   class="mt-1 text-sm text-red-600">
+                  Debes seleccionar un curso
+                </p>
+              </div>
+
+              <!-- Tipo -->
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                  Tipo de Evaluación *
+                </label>
+                <select
+                  formControlName="type"
+                  class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none">
+                  <option value="quiz">Quiz</option>
+                  <option value="exam">Examen</option>
+                  <option value="assignment">Tarea</option>
+                </select>
+              </div>
+
+              <!-- Puntuación Máxima -->
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                  Puntuación Máxima
+                </label>
+                <input
+                  type="number"
+                  formControlName="max_score"
+                  min="1"
+                  class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none">
+              </div>
+
+              <!-- Fecha Límite -->
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                  Fecha Límite
+                </label>
+                <input
+                  type="datetime-local"
+                  formControlName="due_date"
+                  class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none">
+              </div>
+
+              <!-- Límite de Tiempo -->
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                  Límite de Tiempo (minutos)
+                </label>
+                <input
+                  type="number"
+                  formControlName="time_limit"
+                  min="1"
+                  placeholder="Dejar vacío para sin límite"
+                  class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none">
+              </div>
+
+              <!-- Intentos Permitidos -->
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                  Intentos Permitidos
+                </label>
+                <input
+                  type="number"
+                  formControlName="attempts_allowed"
+                  min="1"
+                  class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none">
+              </div>
+
+              <!-- Descripción -->
+              <div class="md:col-span-2">
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                  Descripción / Instrucciones
+                </label>
+                <textarea
+                  formControlName="description"
+                  rows="3"
+                  placeholder="Instrucciones para los estudiantes..."
+                  class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none resize-none">
+                </textarea>
+              </div>
+            </div>
+          </div>
+
+          <!-- Preguntas -->
+          <div class="bg-white rounded-lg shadow-sm p-6 mb-6">
+            <div class="flex justify-between items-center mb-6">
+              <h2 class="text-xl font-bold text-gray-900">Preguntas</h2>
+              <button
+                type="button"
+                (click)="addQuestion()"
+                class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-semibold text-sm">
+                + Agregar Pregunta
+              </button>
+            </div>
+
+            <div formArrayName="questions" class="space-y-6">
+              <div 
+                *ngFor="let question of questions.controls; let i = index"
+                [formGroupName]="i"
+                class="border border-gray-200 rounded-lg p-6 relative">
+                
+                <!-- Botón Eliminar -->
+                <button
+                  type="button"
+                  (click)="removeQuestion(i)"
+                  class="absolute top-4 right-4 text-red-600 hover:text-red-700">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                  </svg>
+                </button>
+
+                <h3 class="text-lg font-semibold text-gray-900 mb-4">Pregunta {{ i + 1 }}</h3>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                  <!-- Tipo de Pregunta -->
+                  <div class="md:col-span-2">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                      Tipo de Pregunta
+                    </label>
+                    <select
+                      formControlName="question_type"
+                      (change)="onQuestionTypeChange(i)"
+                      class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+                      <option value="multiple_choice">Selección Múltiple</option>
+                      <option value="true_false">Verdadero/Falso</option>
+                      <option value="short_answer">Respuesta Corta</option>
+                      <option value="essay">Ensayo</option>
+                    </select>
+                  </div>
+
+                  <!-- Puntos -->
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                      Puntos
+                    </label>
+                    <input
+                      type="number"
+                      formControlName="points"
+                      min="1"
+                      class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+                  </div>
+                </div>
+
+                <!-- Texto de la Pregunta -->
+                <div class="mb-4">
+                  <label class="block text-sm font-medium text-gray-700 mb-2">
+                    Texto de la Pregunta *
+                  </label>
+                  <textarea
+                    formControlName="question_text"
+                    rows="2"
+                    placeholder="Escribe tu pregunta aquí..."
+                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none resize-none">
+                  </textarea>
+                </div>
+
+                <!-- Opciones (Selección Múltiple) -->
+                <div *ngIf="getQuestionType(i) === 'multiple_choice'" class="mb-4">
+                  <label class="block text-sm font-medium text-gray-700 mb-2">
+                    Opciones (una por línea)
+                  </label>
+                  <textarea
+                    formControlName="options_text"
+                    rows="4"
+                    placeholder="Opción 1&#10;Opción 2&#10;Opción 3&#10;Opción 4"
+                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none resize-none font-mono text-sm">
+                  </textarea>
+                  <p class="text-xs text-gray-500 mt-1">Escribe cada opción en una línea nueva</p>
+                </div>
+
+                <!-- Respuesta Correcta -->
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-2">
+                    Respuesta Correcta *
+                  </label>
+                  <input
+                    type="text"
+                    formControlName="correct_answer"
+                    placeholder="Respuesta correcta"
+                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+                  <p class="text-xs text-gray-500 mt-1">
+                    Para selección múltiple y V/F, escribe exactamente la opción correcta
+                  </p>
+                </div>
+
+              </div>
+            </div>
+
+            <p *ngIf="questions.length === 0" class="text-center text-gray-500 py-8">
+              No hay preguntas. Haz clic en "Agregar Pregunta" para comenzar.
+            </p>
+          </div>
+
+          <!-- Mensaje de Error -->
+          <div *ngIf="errorMessage" class="bg-red-50 border border-red-200 rounded-lg p-4 mb-6 text-red-700">
+            {{ errorMessage }}
+          </div>
+
+          <!-- Botones de Acción -->
+          <div class="flex gap-4">
+            <button
+              type="submit"
+              [disabled]="loading || assessmentForm.invalid || questions.length === 0"
+              class="flex-1 bg-blue-600 text-white py-3 px-6 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition font-semibold flex items-center justify-center gap-2">
+              <svg *ngIf="loading" class="animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+              </svg>
+              <span *ngIf="!loading">Crear Evaluación</span>
+              <span *ngIf="loading">Creando...</span>
+            </button>
+            
+            <button
+              type="button"
+              routerLink="/dashboard/docente"
+              [disabled]="loading"
+              class="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition font-semibold">
+              Cancelar
+            </button>
+          </div>
+
+        </form>
+      </main>
+    </div>

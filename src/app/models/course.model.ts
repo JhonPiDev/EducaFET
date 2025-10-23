@@ -27,14 +27,15 @@ export interface Enrollment {
 
 export interface Lesson {
   id: string;
+  courseId: string;
   title: string;
   description: string;
   content: string;
-  courseId?: string;
-  order?: number;
-  duration?: string;
+  order: number;
+  duration: number;
+  videoUrl?: string;
+  materials?: Material[];
 }
-
 
 export interface Material {
   id: string;

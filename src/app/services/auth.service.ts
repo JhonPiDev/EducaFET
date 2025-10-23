@@ -108,6 +108,7 @@ export class AuthService {
     email: string;
     password: string;
     confirmPassword: string;
+    rol: string;
   }): Observable<LoginResponse> {
     return this.http.post<LoginResponse>(`${this.apiUrl}/register`, userData).pipe(
       tap(response => this.handleAuthSuccess(response, false)),

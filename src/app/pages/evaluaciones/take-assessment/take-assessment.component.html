@@ -1,0 +1,279 @@
+<div class="min-h-screen bg-gray-50">
+      <div *ngIf="loading" class="flex items-center justify-center min-h-screen">
+        <div class="text-center">
+          <div class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+          <p class="mt-4 text-gray-600">Cargando evaluación...</p>
+        </div>
+      </div>
+
+      <div *ngIf="!loading && assessment">
+        <!-- Header con Timer -->
+        <header class="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-10">
+          <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <div class="flex justify-between items-center">
+              <div>
+                <h1 class="text-xl font-bold text-gray-900">{{ assessment.title }}</h1>
+                <p class="text-sm text-gray-600">{{ assessment.course_name }}</p>
+              </div>
+              
+              <!-- Timer -->
+              <div *ngIf="assessment.time_limit" class="flex items-center gap-4">
+                <div class="text-right">
+                  <p class="text-sm text-gray-600">Tiempo restante</p>
+                  <p class="text-2xl font-bold" [ngClass]="{
+                    'text-red-600': timeRemaining < 300,
+                    'text-yellow-600': timeRemaining >= 300 && timeRemaining < 600,
+                    'text-green-600': timeRemaining >= 600
+                  }">
+                    {{ formatTime(timeRemaining) }}
+                  </p>
+                </div>
+                <div class="w-16 h-16 relative">
+                  <svg class="w-full h-full transform -rotate-90">
+                    <circle cx="32" cy="32" r="28" stroke="#e5e7eb" stroke-width="4" fill="none"></circle>
+                    <circle 
+                      cx="32" cy="32" r="28" 
+                      [attr.stroke]="timeRemaining < 300 ? '#dc2626' : timeRemaining < 600 ? '#f59e0b' : '#10b981'"
+                      stroke-width="4" 
+                      fill="none"
+                      stroke-linecap="round"
+                      [style.stroke-dasharray]="'176'"
+                      [style.stroke-dashoffset]="176 - (176 * timeRemaining / (assessment.time_limit! * 60))">
+                    </circle>
+                  </svg>
+                </div>
+              </div>
+            </div>
+          </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          
+          <!-- Instrucciones -->
+          <div class="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-8">
+            <h2 class="text-lg font-bold text-blue-900 mb-2">Instrucciones</h2>
+            <p class="text-blue-800 mb-4">{{ assessment.description }}</p>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+              <div class="flex items-center text-blue-900">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                </svg>
+                <span>{{ questions.length }} preguntas</span>
+              </div>
+              <div class="flex items-center text-blue-900">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                <span>{{ assessment.max_score }} puntos</span>
+              </div>
+              <div *ngIf="assessment.time_limit" class="flex items-center text-blue-900">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                <span>{{ assessment.time_limit }} minutos</span>
+              </div>
+              <div class="flex items-center text-blue-900">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                </svg>
+                <span>{{ assessment.attempts_allowed }} intento(s)</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Preguntas -->
+          <div class="space-y-6">
+            <div 
+              *ngFor="let question of questions; let i = index"
+              class="bg-white rounded-lg shadow-sm p-6 border-l-4"
+              [ngClass]="{
+                'border-green-500': answers[question.id],
+                'border-gray-300': !answers[question.id]
+              }">
+              
+              <!-- Pregunta Header -->
+              <div class="flex justify-between items-start mb-4">
+                <h3 class="text-lg font-semibold text-gray-900">
+                  Pregunta {{ i + 1 }}
+                  <span class="text-sm font-normal text-gray-500 ml-2">({{ question.points }} punto{{ question.points > 1 ? 's' : ''}})</span>
+                </h3>
+                <span class="px-2 py-1 text-xs bg-gray-100 text-gray-700 rounded">
+                  {{ getQuestionTypeLabel(question.question_type) }}
+                </span>
+              </div>
+
+              <!-- Texto de la pregunta -->
+              <p class="text-gray-800 mb-4">{{ question.question_text }}</p>
+
+              <!-- Opciones según tipo de pregunta -->
+              
+              <!-- Selección Múltiple -->
+              <div *ngIf="question.question_type === 'multiple_choice' && question.options" class="space-y-3">
+                <label 
+                  *ngFor="let option of question.options; let j = index"
+                  class="flex items-center p-4 border rounded-lg cursor-pointer hover:bg-gray-50 transition"
+                  [class.border-blue-500]="answers[question.id] === option"
+                  [class.bg-blue-50]="answers[question.id] === option">
+                  <input 
+                    type="radio" 
+                    [name]="'question-' + question.id"
+                    [value]="option"
+                    [(ngModel)]="answers[question.id]"
+                    class="w-4 h-4 text-blue-600">
+                  <span class="ml-3 text-gray-800">{{ option }}</span>
+                </label>
+              </div>
+
+              <!-- Verdadero/Falso -->
+              <div *ngIf="question.question_type === 'true_false'" class="space-y-3">
+                <label 
+                  class="flex items-center p-4 border rounded-lg cursor-pointer hover:bg-gray-50 transition"
+                  [class.border-blue-500]="answers[question.id] === 'Verdadero'"
+                  [class.bg-blue-50]="answers[question.id] === 'Verdadero'">
+                  <input 
+                    type="radio" 
+                    [name]="'question-' + question.id"
+                    value="Verdadero"
+                    [(ngModel)]="answers[question.id]"
+                    class="w-4 h-4 text-blue-600">
+                  <span class="ml-3 text-gray-800">Verdadero</span>
+                </label>
+                <label 
+                  class="flex items-center p-4 border rounded-lg cursor-pointer hover:bg-gray-50 transition"
+                  [class.border-blue-500]="answers[question.id] === 'Falso'"
+                  [class.bg-blue-50]="answers[question.id] === 'Falso'">
+                  <input 
+                    type="radio" 
+                    [name]="'question-' + question.id"
+                    value="Falso"
+                    [(ngModel)]="answers[question.id]"
+                    class="w-4 h-4 text-blue-600">
+                  <span class="ml-3 text-gray-800">Falso</span>
+                </label>
+              </div>
+
+              <!-- Respuesta Corta -->
+              <div *ngIf="question.question_type === 'short_answer'">
+                <input 
+                  type="text"
+                  [(ngModel)]="answers[question.id]"
+                  placeholder="Escribe tu respuesta..."
+                  class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none">
+              </div>
+
+              <!-- Ensayo -->
+              <div *ngIf="question.question_type === 'essay'">
+                <textarea 
+                  [(ngModel)]="answers[question.id]"
+                  rows="6"
+                  placeholder="Escribe tu ensayo aquí..."
+                  class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none resize-none">
+                </textarea>
+                <p class="text-sm text-gray-500 mt-2">
+                  {{ (answers[question.id].length || 0) }} caracteres
+                </p>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- Progreso -->
+          <div class="bg-white rounded-lg shadow-sm p-6 mt-8">
+            <div class="flex justify-between items-center mb-2">
+              <span class="text-sm font-medium text-gray-700">Progreso</span>
+              <span class="text-sm font-semibold text-gray-900">
+                {{ getAnsweredCount() }} / {{ questions.length }} respondidas
+              </span>
+            </div>
+            <div class="w-full bg-gray-200 rounded-full h-2">
+              <div 
+                class="bg-blue-600 h-2 rounded-full transition-all"
+                [style.width.%]="(getAnsweredCount() / questions.length) * 100">
+              </div>
+            </div>
+          </div>
+
+          <!-- Botones de Acción -->
+          <div class="flex gap-4 mt-8">
+            <button
+              (click)="submitAssessment()"
+              [disabled]="submitting || getAnsweredCount() === 0"
+              class="flex-1 bg-blue-600 text-white py-3 px-6 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition font-semibold flex items-center justify-center gap-2">
+              <svg *ngIf="submitting" class="animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+              </svg>
+              <span *ngIf="!submitting">Enviar Evaluación</span>
+              <span *ngIf="submitting">Enviando...</span>
+            </button>
+            
+            <button
+              (click)="cancelAssessment()"
+              [disabled]="submitting"
+              class="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition font-semibold">
+              Cancelar
+            </button>
+          </div>
+
+        </main>
+      </div>
+    </div>
+
+    <!-- Modal de Confirmación -->
+    <div *ngIf="showConfirmModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div class="bg-white rounded-lg max-w-md w-full p-6">
+        <h3 class="text-xl font-bold text-gray-900 mb-4">¿Enviar evaluación?</h3>
+        <p class="text-gray-600 mb-6">
+          Has respondido {{ getAnsweredCount() }} de {{ questions.length }} preguntas.
+          Una vez enviada, no podrás modificar tus respuestas.
+        </p>
+        <div class="flex gap-3">
+          <button
+            (click)="confirmSubmit()"
+            class="flex-1 bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition font-semibold">
+            Sí, enviar
+          </button>
+          <button
+            (click)="showConfirmModal = false"
+            class="flex-1 bg-gray-200 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-300 transition font-semibold">
+            Cancelar
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal de Resultado -->
+    <div *ngIf="showResultModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div class="bg-white rounded-lg max-w-md w-full p-6">
+        <div class="text-center">
+          <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+            </svg>
+          </div>
+          <h3 class="text-2xl font-bold text-gray-900 mb-2">¡Evaluación Enviada!</h3>
+          
+          <div *ngIf="submissionResult">
+            <p class="text-gray-600 mb-6">{{ submissionResult.message }}</p>
+            
+            <!-- Mostrar calificación si es quiz con calificación automática -->
+            <div *ngIf="submissionResult.score !== undefined" class="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-6">
+              <p class="text-sm text-blue-800 mb-2">Tu calificación</p>
+              <p class="text-4xl font-bold text-blue-600">
+                {{ submissionResult.score }} / {{ submissionResult.max_score }}
+              </p>
+              <p class="text-sm text-blue-700 mt-2">
+                {{ calculatePercentage(submissionResult.score, submissionResult.max_score) }}%
+              </p>
+            </div>
+          </div>
+
+          <button
+            (click)="goToList()"
+            class="w-full bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 transition font-semibold">
+            Volver a Evaluaciones
+          </button>
+        </div>
+      </div>
+    </div>

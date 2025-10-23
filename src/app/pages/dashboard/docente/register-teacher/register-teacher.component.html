@@ -1,0 +1,65 @@
+<div class="min-h-screen bg-gray-50 py-10">
+  <div class="max-w-3xl mx-auto bg-white p-8 rounded-xl shadow-sm border border-gray-200">
+    <h2 class="text-2xl font-bold text-gray-900 mb-2">Registrar Nuevo Docente</h2>
+    <p class="text-gray-600 mb-6">Complete la información para agregar un nuevo docente al sistema.</p>
+    <button 
+      routerLink="/dashboard/admin"
+      class="mb-6 px-4 py-2 text-gray-600 hover:bg-gray-50 border border-gray-300 rounded-lg transition">
+      ← Volver al Panel de Administración
+    </button>
+
+    <form [formGroup]="teacherForm" (ngSubmit)="registerTeacher()" class="space-y-5">
+      <!-- Nombre -->
+      <div>
+        <label class="block text-gray-700 mb-1">Nombre completo</label>
+        <input type="text" formControlName="name"
+          class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+        <p *ngIf="teacherForm.get('name')?.touched && teacherForm.get('name')?.invalid" class="text-red-500 text-sm mt-1">
+          El nombre es obligatorio y debe tener al menos 3 caracteres.
+        </p>
+      </div>
+
+      <!-- Correo -->
+      <div>
+        <label class="block text-gray-700 mb-1">Correo electrónico</label>
+        <input type="email" formControlName="email"
+          class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+        <p *ngIf="teacherForm.get('email')?.touched && teacherForm.get('email')?.invalid" class="text-red-500 text-sm mt-1">
+          Ingrese un correo electrónico válido.
+        </p>
+      </div>
+
+      <!-- Contraseña -->
+      <div>
+        <label class="block text-gray-700 mb-1">Contraseña</label>
+        <input type="password" formControlName="password"
+          class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+        <p *ngIf="teacherForm.get('password')?.touched && teacherForm.get('password')?.invalid" class="text-red-500 text-sm mt-1">
+          La contraseña debe tener al menos 6 caracteres.
+        </p>
+      </div>
+
+      <!-- Confirmar contraseña -->
+      <div>
+        <label class="block text-gray-700 mb-1">Confirmar contraseña</label>
+        <input type="password" formControlName="confirmPassword"
+          class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+      </div>
+
+      <!-- Mensajes -->
+      <div *ngIf="errorMessage" class="bg-red-50 text-red-600 p-3 rounded-lg text-sm">
+        {{ errorMessage }}
+      </div>
+      <div *ngIf="successMessage" class="bg-green-50 text-green-600 p-3 rounded-lg text-sm">
+        {{ successMessage }}
+      </div>
+
+      <!-- Botón -->
+      <button type="submit" [disabled]="loading"
+        class="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg transition flex justify-center items-center gap-2">
+        <span *ngIf="!loading">Registrar Docente</span>
+        <span *ngIf="loading" class="animate-spin h-5 w-5 border-2 border-white border-t-transparent rounded-full"></span>
+      </button>
+    </form>
+  </div>
+</div>

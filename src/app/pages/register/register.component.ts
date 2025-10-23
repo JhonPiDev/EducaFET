@@ -107,8 +107,11 @@ export class RegisterComponent implements OnInit {
       name: this.nombre?.value, // 👈 Cambiado a "name" para coincidir con el AuthService
       email: this.email?.value,
       password: this.password?.value,
-      confirmPassword: this.confirmPassword?.value
+      confirmPassword: this.confirmPassword?.value,
+      rol: this.rol?.value 
     };
+
+    console.log('📤 Datos enviados al backend:', formData);
 
     this.authService.register(formData).subscribe({
       next: (res) => {

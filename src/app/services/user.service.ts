@@ -87,4 +87,10 @@ export class UserService {
   deleteUser(id: string): Observable<{ message: string }> {
     return this.http.delete<{ message: string }>(`${this.apiUrl}/${id}`);
   }
+
+  
+  register(data: any): Observable<any> {
+  return this.http.post('http://localhost:3000/api/auth/register', data);
+}
+
 }

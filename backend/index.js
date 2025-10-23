@@ -5,6 +5,7 @@ import dotenv from 'dotenv';
 import authRoutes from './routes/auth.routes.js';
 import courseRoutes from './routes/course.routes.js';
 import userRoutes from './routes/user.routes.js';
+import assessmentRoutes from './routes/assessment.routes.js';
 
 dotenv.config();
 const app = express();
@@ -15,6 +16,7 @@ app.use(bodyParser.json());
 app.use('/api/auth', authRoutes);
 app.use('/api/courses', courseRoutes);
 app.use('/api/users', userRoutes);
+app.use('/api/assessments', assessmentRoutes);
 
 app.get('/', (req, res) => res.send('Servidor EDUCAFET corriendo 🚀'));
 

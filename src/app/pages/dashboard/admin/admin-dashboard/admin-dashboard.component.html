@@ -28,15 +28,20 @@
     
     <!-- Quick Actions -->
     <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-      <button class="bg-white p-4 rounded-lg shadow-sm hover:shadow-md transition flex items-center gap-3 border-l-4 border-blue-600">
-        <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path>
+      <!-- 🔹 Nuevo botón: Registrar Docente -->
+      <button 
+        routerLink="/dashboard/docente/registrar"
+        class="bg-white p-4 rounded-lg shadow-sm hover:shadow-md transition flex items-center gap-3 border-l-4 border-indigo-600">
+        <svg class="w-8 h-8 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+          d="M12 4.354a4 4 0 110 5.292M16 21H4v-1a6 6 0 0112 0v1zm0 0h4v-1a6 6 0 00-9-5.197M14 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
         </svg>
         <div class="text-left">
-          <p class="text-sm text-gray-600">Nuevo</p>
-          <p class="font-semibold text-gray-900">Usuario</p>
+          <p class="text-sm text-gray-600">Registrar</p>
+          <p class="font-semibold text-gray-900">Docente</p>
         </div>
       </button>
+
 
       <button class="bg-white p-4 rounded-lg shadow-sm hover:shadow-md transition flex items-center gap-3 border-l-4 border-green-600">
         <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">

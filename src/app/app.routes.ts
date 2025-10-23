@@ -8,6 +8,9 @@ import { AdminDashboardComponent } from './pages/dashboard/admin/admin-dashboard
 import { CursosListComponent } from './pages/cursos/cursos-list/cursos-list.component';
 import { CursoDetailComponent } from './pages/cursos/cursos-detail/cursos-detail.component';
 import { PerfilComponent } from './pages/perfil/perfil.component';
+import { TakeAssessmentComponent } from './pages/evaluaciones/take-assessment/take-assessment.component';
+import { CreateAssessmentComponent } from './pages/evaluaciones/create-assessment/create-assessment.component';
+import { RegisterTeacherComponent } from './pages/dashboard/docente/register-teacher/register-teacher.component';
 
 
 export const routes: Routes = [
@@ -29,9 +32,15 @@ export const routes: Routes = [
   { path: 'cursos', component: CursosListComponent },
   // Detalle de un curso
   { path: 'cursos/:id', component: CursoDetailComponent },
+  // Crear evaluación (docente)
+  { path: 'evaluaciones/crear', component: CreateAssessmentComponent },
+  // Registrar docente (admin)
+  { path: 'dashboard/docente/registrar', component: RegisterTeacherComponent },
   // Perfil de usuario
   // ✅ Ruta del perfil
   { path: 'perfil/:id', loadComponent: () => import('./pages/perfil/perfil.component').then(m => m.PerfilComponent) },
+  // Tomar evaluación
+  { path: 'evaluaciones', component: TakeAssessmentComponent },
 
 
   // Ruta comodín - debe ir siempre al final

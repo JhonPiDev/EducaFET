@@ -51,12 +51,7 @@ export class CursoDetailComponent implements OnInit {
         status: 'active'
       };
 
-      this.lessons = [
-        { id: '1', courseId: id, order: 1, duration: '25 min', title: 'Límites y Continuidad', description: 'Conceptos básicos de límites y funciones continuas.', content: '#' },
-        { id: '2', courseId: id, order: 2, duration: '30 min', title: 'Derivadas', description: 'Definición y aplicaciones de la derivada.', content: '#' },
-        { id: '3', courseId: id, order: 3, duration: '40 min', title: 'Integrales Definidas', description: 'Técnicas de integración y área bajo la curva.', content: '#' },
-        { id: '4', courseId: id, order: 4, duration: '35 min', title: 'Ecuaciones Diferenciales', description: 'Resolución de ecuaciones diferenciales básicas.', content: '#' }
-      ];
+      
       break;
 
     case '2':
@@ -76,12 +71,7 @@ export class CursoDetailComponent implements OnInit {
         status: 'active'
       };
 
-      this.lessons = [
-        { id: '1', courseId: id, order: 1, duration: '20 min', title: 'Estructura HTML', description: 'Aprende las etiquetas fundamentales de HTML.', content: '#' },
-        { id: '2', courseId: id, order: 2, duration: '25 min', title: 'Estilos con CSS', description: 'Cómo aplicar estilos, colores y diseño responsivo.', content: '#' },
-        { id: '3', courseId: id, order: 3, duration: '30 min', title: 'Fundamentos de JavaScript', description: 'Variables, funciones y manipulación del DOM.', content: '#' },
-        { id: '4', courseId: id, order: 4, duration: '35 min', title: 'Frameworks Modernos', description: 'Introducción a Angular y React.', content: '#' }
-      ];
+     
       break;
 
     case '3':
@@ -101,12 +91,7 @@ export class CursoDetailComponent implements OnInit {
         status: 'active'
       };
 
-      this.lessons = [
-        { id: '1', courseId: id, order: 1, duration: '20 min', title: 'Modelo Relacional', description: 'Conceptos básicos del modelo entidad-relación.', content: '#' },
-        { id: '2', courseId: id, order: 2, duration: '25 min', title: 'SQL Básico', description: 'Consultas SELECT, INSERT, UPDATE y DELETE.', content: '#' },
-        { id: '3', courseId: id, order: 3, duration: '30 min', title: 'Normalización', description: 'Evita la redundancia de datos mediante normalización.', content: '#' },
-        { id: '4', courseId: id, order: 4, duration: '35 min', title: 'Bases NoSQL', description: 'Introducción a MongoDB y estructuras no relacionales.', content: '#' }
-      ];
+      
       break;
 
     case '4':
@@ -126,12 +111,7 @@ export class CursoDetailComponent implements OnInit {
         status: 'active'
       };
 
-      this.lessons = [
-        { id: '1', courseId: id, order: 1, duration: '15 min', title: 'Introducción a Python', description: 'Conoce la historia y sintaxis básica del lenguaje.', content: '#' },
-        { id: '2', courseId: id, order: 2, duration: '20 min', title: 'Variables y Tipos de Datos', description: 'Aprende a trabajar con variables y diferentes tipos de datos.', content: '#' },
-        { id: '3', courseId: id, order: 3, duration: '25 min', title: 'Estructuras de Control', description: 'Usa condicionales y bucles para controlar el flujo de tu programa.', content: '#' },
-        { id: '4', courseId: id, order: 4, duration: '18 min', title: 'Funciones en Python', description: 'Define y utiliza funciones para organizar tu código.', content: '#' }
-      ];
+      
       break;
   }
 
