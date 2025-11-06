@@ -1,25 +1,35 @@
 import { db } from '../config/db.js';
 
 export const CourseModel = {
-  // Obtener todos los cursos
+  // Obtener todos los cursos con estadísticas
   async findAll() {
     const [rows] = await db.query(`
-      SELECT c.*, u.nombre as teacher_name 
+      SELECT 
+        c.*,
+        u.nombre as teacher_name,
+        COUNT(DISTINCT e.student_id) as students
       FROM courses c 
       LEFT JOIN users u ON c.teacher_id = u.id
+      LEFT JOIN enrollments e ON c.id = e.course_id AND e.status = 'active'
       WHERE c.status = 'active'
+      GROUP BY c.id
       ORDER BY c.created_at DESC
     `);
     return rows;
   },
 
-  // Obtener curso por ID
+  // Obtener curso por ID con estadísticas
   async findById(id) {
     const [rows] = await db.query(`
-      SELECT c.*, u.nombre as teacher_name 
+      SELECT 
+        c.*,
+        u.nombre as teacher_name,
+        COUNT(DISTINCT e.student_id) as students
       FROM courses c 
       LEFT JOIN users u ON c.teacher_id = u.id
+      LEFT JOIN enrollments e ON c.id = e.course_id AND e.status = 'active'
       WHERE c.id = ?
+      GROUP BY c.id
     `, [id]);
     return rows[0];
   },
@@ -70,9 +80,11 @@ export const CourseModel = {
   // Obtener cursos de un docente
   async findByTeacher(teacherId) {
     const [rows] = await db.query(`
-      SELECT c.*, COUNT(e.id) as students_count
+      SELECT 
+        c.*,
+        COUNT(DISTINCT e.student_id) as students
       FROM courses c
-      LEFT JOIN enrollments e ON c.id = e.course_id
+      LEFT JOIN enrollments e ON c.id = e.course_id AND e.status = 'active'
       WHERE c.teacher_id = ? AND c.status = 'active'
       GROUP BY c.id
       ORDER BY c.created_at DESC
@@ -80,14 +92,21 @@ export const CourseModel = {
     return rows;
   },
 
-  // Obtener cursos de un estudiante
+  // Obtener cursos de un estudiante (inscritos)
   async findByStudent(studentId) {
     const [rows] = await db.query(`
-      SELECT c.*, u.nombre as teacher_name, e.progress, e.enrollment_date
+      SELECT 
+        c.*,
+        u.nombre as teacher_name,
+        e.progress,
+        e.enrollment_date,
+        COUNT(DISTINCT e2.student_id) as students
       FROM enrollments e
       JOIN courses c ON e.course_id = c.id
       LEFT JOIN users u ON c.teacher_id = u.id
-      WHERE e.student_id = ? AND e.status = 'active'
+      LEFT JOIN enrollments e2 ON c.id = e2.course_id AND e2.status = 'active'
+      WHERE e.student_id = ? AND e.status = 'active' AND c.status = 'active'
+      GROUP BY c.id, e.id
       ORDER BY e.enrollment_date DESC
     `, [studentId]);
     return rows;

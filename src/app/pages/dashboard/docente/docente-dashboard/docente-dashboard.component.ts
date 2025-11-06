@@ -1,58 +1,75 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { RouterModule, RouterLink, Router } from '@angular/router';
 import { AuthService, User } from '../../../../services/auth.service';
+import { CourseService } from '../../../../services/course.service';
+import { Course } from '../../../../models/course.model';
 
-interface Course {
-  id: string;
-  name: string;
-  students: number;
-  nextClass: string;
-  completionRate: number;
-}
-
-interface RecentActivity {
-  id: string;
-  student: string;
-  action: string;
-  course: string;
-  time: Date;
+interface DashboardStats {
+  activeCourses: number;
+  totalStudents: number;
+  pendingReviews: number;
+  averageGrade: number;
 }
 
 @Component({
   selector: 'app-docente-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, RouterLink],
   templateUrl: './docente-dashboard.component.html',
 })
 export class DocenteDashboardComponent implements OnInit {
   user: User | null = null;
+  courses: Course[] = [];
+  loading = true;
   
-  stats = {
-    activeCourses: 6,
-    totalStudents: 142,
-    pendingReviews: 23,
-    averageGrade: 4.3
+  stats: DashboardStats = {
+    activeCourses: 0,
+    totalStudents: 0,
+    pendingReviews: 0,
+    averageGrade: 0
   };
 
-  courses: Course[] = [
-    { id: '1', name: 'Matemáticas Avanzadas', students: 35, nextClass: 'Lunes 10:00 AM', completionRate: 68 },
-    { id: '2', name: 'Programación Web', students: 28, nextClass: 'Martes 2:00 PM', completionRate: 72 },
-    { id: '3', name: 'Base de Datos', students: 42, nextClass: 'Miércoles 9:00 AM', completionRate: 85 },
-    { id: '4', name: 'Inteligencia Artificial', students: 37, nextClass: 'Jueves 11:00 AM', completionRate: 55 },
-  ];
+  recentActivities: any[] = [];
 
-  recentActivities: RecentActivity[] = [
-    { id: '1', student: 'Juan Pérez', action: 'Entregó tarea', course: 'Matemáticas', time: new Date('2025-10-14T10:30:00') },
-    { id: '2', student: 'María García', action: 'Completó evaluación', course: 'Programación', time: new Date('2025-10-14T09:15:00') },
-    { id: '3', student: 'Carlos López', action: 'Comentó en el foro', course: 'Base de Datos', time: new Date('2025-10-14T08:45:00') },
-    { id: '4', student: 'Ana Martínez', action: 'Vio el material', course: 'IA', time: new Date('2025-10-13T16:20:00') },
-  ];
-
-  constructor(private authService: AuthService) {}
+  constructor(
+    private authService: AuthService,
+    private courseService: CourseService,
+    private router: Router
+  ) {}
 
   ngOnInit(): void {
     this.user = this.authService.getCurrentUser();
+    this.loadMyCourses();
+  }
+
+  loadMyCourses(): void {
+    this.loading = true;
+
+    this.courseService.getMyCourses().subscribe({
+      next: (courses) => {
+        this.courses = courses;
+        this.calculateStats(courses);
+        this.loading = false;
+      },
+      error: (error) => {
+        console.error('Error al cargar cursos:', error);
+        this.loading = false;
+      }
+    });
+  }
+
+  calculateStats(courses: Course[]): void {
+    this.stats.activeCourses = courses.length;
+    
+    // Calcular total de estudiantes
+    this.stats.totalStudents = courses.reduce((total, course) => {
+      return total + (course.students || 0);
+    }, 0);
+
+    // TODO: Obtener del backend
+    this.stats.pendingReviews = 23;
+    this.stats.averageGrade = 4.3;
   }
 
   logout(): void {

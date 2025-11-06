@@ -15,6 +15,7 @@ export class RegisterComponent implements OnInit {
   registerForm!: FormGroup;
   loading = false;
   errorMessage = '';
+  successMessage = '';
   showPassword = false;
   showConfirmPassword = false;
 
@@ -116,8 +117,10 @@ export class RegisterComponent implements OnInit {
     this.authService.register(formData).subscribe({
       next: (res) => {
         this.loading = false;
-        console.log('✅ Usuario registrado correctamente:', res);
-        this.router.navigate(['/home']); // Redirige al login
+        this.successMessage = '✅ Usuario registrado exitosamente.';
+        setTimeout(() => {  
+          this.router.navigate(['/home']);
+        }, 2500); // Espera 2.5 segundos antes de redirigir
       },
       error: (err) => {
         this.loading = false;

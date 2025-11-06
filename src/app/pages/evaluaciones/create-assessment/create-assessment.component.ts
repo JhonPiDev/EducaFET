@@ -50,14 +50,20 @@ export class CreateAssessmentComponent implements OnInit {
   }
 
   loadCourses(): void {
-    // En producción usar: this.courseService.getMyCourses()
-    // Por ahora datos simulados
-    this.courses = [
-      { id: '1', name: 'Matemáticas Avanzadas' } as Course,
-      { id: '2', name: 'Programación Web' } as Course,
-      { id: '3', name: 'Base de Datos' } as Course
-    ];
-  }
+  this.loading = true;
+  this.courseService.getCoursesByTeacher().subscribe({
+    next: (courses) => {
+      this.courses = courses;
+      this.loading = false;
+    },
+    error: (error) => {
+      console.error('Error cargando cursos del docente:', error);
+      this.errorMessage = 'Error al cargar los cursos. Intenta nuevamente.';
+      this.loading = false;
+    }
+  });
+}
+
 
   addQuestion(): void {
     const questionGroup = this.fb.group({

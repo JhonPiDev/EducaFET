@@ -2,22 +2,10 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { AuthService, User } from '../../../../services/auth.service';
-
-interface CourseProgress {
-  id: string;
-  name: string;
-  progress: number;
-  nextClass: string;
-  teacher: string;
-}
-
-interface Assignment {
-  id: string;
-  title: string;
-  course: string;
-  dueDate: Date;
-  status: 'pending' | 'completed' | 'overdue';
-}
+import { CourseService } from '../../../../services/course.service';
+import { AssessmentService } from '../../../../services/assessment.service';
+import { Course } from '../../../../models/course.model';
+import { Assessment } from '../../../../models/assessment.model';
 
 @Component({
   selector: 'app-estudiante-dashboard',
@@ -27,33 +15,85 @@ interface Assignment {
 })
 export class EstudianteDashboardComponent implements OnInit {
   user: User | null = null;
+  courses: Course[] = [];
+  pendingAssessments: Assessment[] = [];
+  loading = true;
   
   stats = {
-    activeCourses: 5,
-    pendingAssignments: 8,
-    averageGrade: 4.2,
-    studyHours: 24
+    activeCourses: 0,
+    pendingAssignments: 0,
+    averageGrade: 0,
+    studyHours: 0
   };
 
-  courses: CourseProgress[] = [
-    { id: '1', name: 'Matemáticas Avanzadas', progress: 75, nextClass: 'Lunes 10:00 AM', teacher: 'Prof. García' },
-    { id: '2', name: 'Programación Web', progress: 60, nextClass: 'Martes 2:00 PM', teacher: 'Prof. Martínez' },
-    { id: '3', name: 'Base de Datos', progress: 85, nextClass: 'Miércoles 9:00 AM', teacher: 'Prof. López' },
-  ];
-
-  assignments: Assignment[] = [
-    { id: '1', title: 'Tarea de Cálculo', course: 'Matemáticas', dueDate: new Date('2025-10-20'), status: 'pending' },
-    { id: '2', title: 'Proyecto Final', course: 'Programación', dueDate: new Date('2025-10-25'), status: 'pending' },
-    { id: '3', title: 'Examen Parcial', course: 'Base de Datos', dueDate: new Date('2025-10-15'), status: 'overdue' },
-  ];
-
-  constructor(private authService: AuthService) {}
+  constructor(
+    private authService: AuthService,
+    private courseService: CourseService,
+    private assessmentService: AssessmentService
+  ) {}
 
   ngOnInit(): void {
     this.user = this.authService.getCurrentUser();
+    this.loadDashboardData();
+  }
+
+  loadDashboardData(): void {
+    this.loading = true;
+
+    // Cargar cursos del estudiante
+    this.courseService.getMyCourses().subscribe({
+      next: (courses) => {
+        this.courses = courses;
+        this.stats.activeCourses = courses.length;
+        this.loading = false;
+      },
+      error: (error) => {
+        console.error('Error al cargar cursos:', error);
+        this.loading = false;
+      }
+    });
+
+    // Cargar evaluaciones pendientes
+    this.assessmentService.getPendingAssessments().subscribe({
+      next: (assessments) => {
+        this.pendingAssessments = assessments;
+        this.stats.pendingAssignments = assessments.length;
+      },
+      error: (error) => {
+        console.error('Error al cargar evaluaciones:', error);
+      }
+    });
+
+    // TODO: Obtener promedio y horas de estudio del backend
+    this.stats.averageGrade = 4.2;
+    this.stats.studyHours = 24;
   }
 
   logout(): void {
     this.authService.logout();
+  }
+
+  getProgressColor(progress: number): string {
+    if (progress >= 75) return 'bg-green-600';
+    if (progress >= 50) return 'bg-yellow-600';
+    return 'bg-red-600';
+  }
+
+  getAssignmentStatusColor(status: string): string {
+    switch(status) {
+      case 'completed': return 'bg-green-100 text-green-800';
+      case 'pending': return 'bg-yellow-100 text-yellow-800';
+      case 'overdue': return 'bg-red-100 text-red-800';
+      default: return 'bg-gray-100 text-gray-800';
+    }
+  }
+
+  getAssignmentStatusLabel(status: string): string {
+    switch(status) {
+      case 'completed': return 'Completada';
+      case 'pending': return 'Pendiente';
+      case 'overdue': return 'Vencida';
+      default: return status;
+    }
   }
 }

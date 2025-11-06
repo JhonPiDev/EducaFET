@@ -46,7 +46,7 @@ export class RegisterTeacherComponent implements OnInit {
       confirmPassword,
       rol: 'docente'
     }; 
-    console.log('📤 Datos enviados al backend:', teacherData);
+    //console.log('📤 Datos enviados al backend:', teacherData);
 
     this.loading = true;
     this.errorMessage = '';
@@ -65,3 +65,4 @@ export class RegisterTeacherComponent implements OnInit {
     });
   }
 }
+''

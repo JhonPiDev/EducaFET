@@ -1,3 +1,5 @@
+import { db } from '../config/db.js';
+
 export const EnrollmentModel = {
   // Inscribir estudiante a curso
   async create(studentId, courseId) {

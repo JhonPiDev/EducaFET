@@ -34,77 +34,21 @@ export class CursosListComponent implements OnInit {
   }
 
   loadCourses(): void {
-    this.loading = true;
-    
-    // 🔹 Simulación de datos de ejemplo
-    setTimeout(() => {
-      this.courses = [
-        {
-          id: '1',
-          name: 'Matemáticas Avanzadas',
-          description: 'Aprende cálculo diferencial e integral con aplicaciones prácticas',
-          teacher: 'Prof. García',
-          teacherId: '1',
-          students: 35,
-          duration: '12 semanas',
-          level: 'Avanzado',
-          category: 'Matemáticas',
-          startDate: new Date('2025-01-15'),
-          endDate: new Date('2025-04-15'),
-          schedule: 'Lun-Mie 10:00 AM',
-          status: 'active'
-        },
-        {
-          id: '2',
-          name: 'Programación Web',
-          description: 'Domina HTML, CSS, JavaScript y frameworks modernos',
-          teacher: 'Prof. Martínez',
-          teacherId: '2',
-          students: 28,
-          duration: '16 semanas',
-          level: 'Intermedio',
-          category: 'Programación',
-          startDate: new Date('2025-01-20'),
-          endDate: new Date('2025-05-20'),
-          schedule: 'Mar-Jue 2:00 PM',
-          status: 'active'
-        },
-        {
-          id: '3',
-          name: 'Base de Datos',
-          description: 'Diseño y gestión de bases de datos relacionales y NoSQL',
-          teacher: 'Prof. López',
-          teacherId: '3',
-          students: 42,
-          duration: '10 semanas',
-          level: 'Intermedio',
-          category: 'Programación',
-          startDate: new Date('2025-02-01'),
-          endDate: new Date('2025-04-10'),
-          schedule: 'Mie 9:00 AM',
-          status: 'active'
-        },
-        {
-          id: '4',
-          name: 'Introducción a Python',
-          description: 'Fundamentos de programación con Python desde cero',
-          teacher: 'Prof. Ramírez',
-          teacherId: '4',
-          students: 55,
-          duration: '8 semanas',
-          level: 'Básico',
-          category: 'Programación',
-          startDate: new Date('2025-01-10'),
-          endDate: new Date('2025-03-10'),
-          schedule: 'Lun-Vie 4:00 PM',
-          status: 'active'
-        }
-      ];
-      
-      this.filteredCourses = [...this.courses];
+  this.loading = true;
+  this.courseService.getCourses().subscribe({
+    next: (data) => {
+      this.courses = data;
+      this.filteredCourses = [...data];
       this.loading = false;
-    }, 1000);
-  }
+    },
+    error: (err) => {
+      console.error('Error al obtener cursos:', err);
+      this.loading = false;
+    }
+  });
+}
+
+
 
   filterCourses(): void {
     this.filteredCourses = this.courses.filter(course => {
@@ -122,13 +66,26 @@ export class CursosListComponent implements OnInit {
     });
   }
 
-  enrollCourse(courseId: string, event: Event): void {
-    event.preventDefault();
-    event.stopPropagation();
+ enrollCourse(courseId: string, event: Event): void {
+  event.preventDefault();
+  event.stopPropagation();
 
-    if (confirm('¿Deseas inscribirte en este curso?')) {
-      console.log('Inscribirse al curso:', courseId);
-      alert('¡Inscripción exitosa! (Modo demo)');
-    }
+  if (!this.user) {
+    alert('Debes iniciar sesión para inscribirte');
+    return;
   }
+
+  if (confirm('¿Deseas inscribirte en este curso?')) {
+    this.courseService.enrollCourse(courseId, this.user.id).subscribe({
+      next: () => {
+        alert('¡Inscripción exitosa!');
+        this.loadCourses(); // recargar cursos actualizados
+      },
+      error: (err) => {
+        const msg = err.error?.message || 'Error al inscribirse';
+        alert(msg);
+      }
+    });
+  }
+}
 }

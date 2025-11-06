@@ -1,3 +1,5 @@
+import { db } from '../config/db.js';
+
 export const QuestionModel = {
   // Crear pregunta
   async create({ assessment_id, question_text, question_type, options, correct_answer, points }) {

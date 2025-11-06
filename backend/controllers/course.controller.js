@@ -1,6 +1,7 @@
 import { CourseModel } from '../models/course.model.js';
 import { EnrollmentModel } from '../models/enrollment.model.js';
 import { LessonModel } from '../models/lesson.model.js';
+import { EvaluationModel } from '../models/evaluation.model.js';
 
 export const CourseController = {
   // Obtener todos los cursos con información adicional
@@ -25,6 +26,8 @@ export const CourseController = {
       res.status(500).json({ message: 'Error al obtener cursos' });
     }
   },
+
+  
 
   // Obtener curso por ID con lecciones
   async getCourseById(req, res) {
@@ -163,6 +166,25 @@ export const CourseController = {
       res.status(500).json({ message: 'Error al inscribirse al curso' });
     }
   },
+  
+  // Verificar si el estudiante ya está inscrito en un curso
+async checkEnrollment(req, res) {
+  try {
+    const { id } = req.params; // ID del curso
+    const studentId = req.user.id; // ID del estudiante autenticado
+
+    if (req.user.rol !== 'estudiante') {
+      return res.status(403).json({ message: 'Solo los estudiantes pueden verificar inscripción' });
+    }
+
+    const enrollment = await EnrollmentModel.findOne(studentId, id);
+
+    res.json({ isEnrolled: !!enrollment });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Error al verificar inscripción' });
+  }
+},
 
   // Obtener mis cursos
   async getMyCourses(req, res) {
@@ -189,6 +211,17 @@ export const CourseController = {
       );
 
       res.json(coursesWithDetails);
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: 'Error al obtener cursos' });
+    }
+  },
+
+   // Obtener todos los cursos
+  async getAllCourses(req, res) {
+    try {
+      const courses = await CourseModel.findAll();
+      res.json(courses);
     } catch (error) {
       console.error(error);
       res.status(500).json({ message: 'Error al obtener cursos' });
@@ -235,5 +268,25 @@ export const CourseController = {
       console.error(error);
       res.status(500).json({ message: 'Error al obtener estadísticas' });
     }
+  },
+
+  // Obtener cursos de un docente
+  async getCoursesByTeacher(req, res) {
+  try {
+    const teacherId = req.user.id;
+
+    if (req.user.rol !== 'docente' && req.user.rol !== 'admin') {
+      return res.status(403).json({ message: 'Solo los docentes pueden ver sus cursos' });
+    }
+
+    const courses = await CourseModel.findByTeacher(teacherId);
+    res.json(courses);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Error al obtener cursos del docente' });
   }
+  },
+
+  
+
 };

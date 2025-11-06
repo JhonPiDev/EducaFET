@@ -6,6 +6,7 @@ const SECRET = process.env.JWT_SECRET || 'educafet_secret_key';
 export const authMiddleware = async (req, res, next) => {
   try {
     const authHeader = req.headers.authorization;
+    console.log('🔐 Header recibido:', authHeader);
 
     if (!authHeader) {
       return res.status(401).json({ message: 'Token no proporcionado' });

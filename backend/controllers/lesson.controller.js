@@ -6,9 +6,15 @@ export const LessonController = {
   async getLessonsByCourse(req, res) {
     try {
       const { courseId } = req.params;
-      const lessons = await LessonModel.findByCourse(courseId);
 
-      res.json(lessons);
+      // Si es estudiante, obtener su progreso
+      if (req.user.rol === 'estudiante') {
+        const progress = await LessonModel.getStudentProgress(req.user.id, courseId);
+        res.json(progress);
+      } else {
+        const lessons = await LessonModel.findByCourse(courseId);
+        res.json(lessons);
+      }
     } catch (error) {
       console.error(error);
       res.status(500).json({ message: 'Error al obtener lecciones' });
@@ -35,16 +41,15 @@ export const LessonController = {
   // Crear lección (solo docentes)
   async createLesson(req, res) {
     try {
-      const { courseId } = req.params;
-      const { title, description, content, order_num, duration, video_url } = req.body;
+      const { course_id, title, description, content, order_num, duration, video_url } = req.body;
 
-      // Verificar que sea docente o admin
+      // Verificar que sea docente
       if (req.user.rol !== 'docente' && req.user.rol !== 'admin') {
         return res.status(403).json({ message: 'No tienes permisos para crear lecciones' });
       }
 
-      // Verificar que el curso existe y pertenece al docente
-      const course = await CourseModel.findById(courseId);
+      // Verificar que el curso pertenezca al docente
+      const course = await CourseModel.findById(course_id);
       if (!course) {
         return res.status(404).json({ message: 'Curso no encontrado' });
       }
@@ -53,19 +58,12 @@ export const LessonController = {
         return res.status(403).json({ message: 'No puedes crear lecciones en este curso' });
       }
 
-      // Si no se proporciona order_num, calcular el siguiente
-      let lessonOrder = order_num;
-      if (!lessonOrder) {
-        const lessonCount = await LessonModel.countByCourse(courseId);
-        lessonOrder = lessonCount + 1;
-      }
-
       const lesson = await LessonModel.create({
-        course_id: courseId,
+        course_id,
         title,
         description,
         content,
-        order_num: lessonOrder,
+        order_num,
         duration,
         video_url
       });
@@ -90,23 +88,15 @@ export const LessonController = {
         return res.status(404).json({ message: 'Lección no encontrada' });
       }
 
-      // Verificar que el curso pertenece al docente
+      // Verificar permisos
       const course = await CourseModel.findById(lesson.course_id);
       if (course.teacher_id !== req.user.id && req.user.rol !== 'admin') {
-        return res.status(403).json({ message: 'No tienes permisos para actualizar esta lección' });
+        return res.status(403).json({ message: 'No tienes permisos' });
       }
 
-      const updated = await LessonModel.update(id, req.body);
+      await LessonModel.update(id, req.body);
 
-      if (!updated) {
-        return res.status(400).json({ message: 'No se pudo actualizar la lección' });
-      }
-
-      const updatedLesson = await LessonModel.findById(id);
-      res.json({
-        message: 'Lección actualizada exitosamente',
-        lesson: updatedLesson
-      });
+      res.json({ message: 'Lección actualizada exitosamente' });
     } catch (error) {
       console.error(error);
       res.status(500).json({ message: 'Error al actualizar lección' });
@@ -126,14 +116,34 @@ export const LessonController = {
       // Verificar permisos
       const course = await CourseModel.findById(lesson.course_id);
       if (course.teacher_id !== req.user.id && req.user.rol !== 'admin') {
-        return res.status(403).json({ message: 'No tienes permisos para eliminar esta lección' });
+        return res.status(403).json({ message: 'No tienes permisos' });
       }
 
       await LessonModel.delete(id);
+
       res.json({ message: 'Lección eliminada exitosamente' });
     } catch (error) {
       console.error(error);
       res.status(500).json({ message: 'Error al eliminar lección' });
+    }
+  },
+
+  // Marcar lección como completada (estudiantes)
+  async completeLesson(req, res) {
+    try {
+      const { id } = req.params;
+      const studentId = req.user.id;
+
+      if (req.user.rol !== 'estudiante') {
+        return res.status(403).json({ message: 'Solo los estudiantes pueden completar lecciones' });
+      }
+
+      await LessonModel.markAsCompleted(studentId, id);
+
+      res.json({ message: 'Lección marcada como completada' });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: 'Error al completar lección' });
     }
   }
 };

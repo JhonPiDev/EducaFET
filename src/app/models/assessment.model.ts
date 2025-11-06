@@ -37,7 +37,7 @@ export interface Submission {
   assessment_title?: string;
   assessment_type?: string;
   course_name?: string;
-  answers: { [questionId: string]: string }; // { question_id: answer }
+  answers: { [questionId: string]: string };
   score: number | null;
   max_score?: number;
   feedback: string | null;
@@ -45,7 +45,12 @@ export interface Submission {
   submitted_at: Date;
   graded_at: Date | null;
   graded_by: string | null;
+
+  // 🔹 Campos temporales solo para el frontend (no se guardan en BD)
+  tempScore?: number | null;
+  tempFeedback?: string | null;
 }
+
 
 export interface CreateAssessmentData {
   course_id: string;

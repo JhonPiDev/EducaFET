@@ -11,7 +11,10 @@ import { PerfilComponent } from './pages/perfil/perfil.component';
 import { TakeAssessmentComponent } from './pages/evaluaciones/take-assessment/take-assessment.component';
 import { CreateAssessmentComponent } from './pages/evaluaciones/create-assessment/create-assessment.component';
 import { RegisterTeacherComponent } from './pages/dashboard/docente/register-teacher/register-teacher.component';
-
+import { CreateCourseComponent } from './pages/cursos/create-course/create-course.component';
+import { LessonViewComponent } from './pages/lessons/lesson-view/lesson-view.component';
+import { CreateLessonComponent } from './pages/lessons/create-lesson/create-lesson.component';
+import { GradeSubmissionsComponent } from './pages/evaluaciones/grade-submissions/grade-submissions.component';
 
 export const routes: Routes = [
   // Ruta principal - home
@@ -36,6 +39,16 @@ export const routes: Routes = [
   { path: 'evaluaciones/crear', component: CreateAssessmentComponent },
   // Registrar docente (admin)
   { path: 'dashboard/docente/registrar', component: RegisterTeacherComponent },
+  // Crear curso (docente)
+  { path: 'dashboard/cursos-create', component: CreateCourseComponent },
+  // Ver lección
+  { path: 'lessons/:id', component: LessonViewComponent },
+  // Crear lección (docente)
+  { path: 'cursos/:courseId/lecciones/crear', component: CreateLessonComponent },
+  // Calificar entregas (docente)
+  { path: 'evaluaciones/:id/calificar', component: GradeSubmissionsComponent },
+
+ 
   // Perfil de usuario
   // ✅ Ruta del perfil
   { path: 'perfil/:id', loadComponent: () => import('./pages/perfil/perfil.component').then(m => m.PerfilComponent) },

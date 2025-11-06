@@ -1,0 +1,155 @@
+<div class="min-h-screen bg-gray-50">
+    <!-- Header -->
+    <header class="bg-white shadow-sm border-b border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <div class="flex justify-between items-center">
+                <div>
+                    <h1 class="text-2xl font-bold text-gray-900">Calificar Envíos</h1>
+                    <p class="text-gray-600">{{ assessment?.title }}</p>
+                </div>
+                <button routerLink="/dashboard/docente"
+                    class="px-4 py-2 text-gray-600 hover:bg-gray-50 border border-gray-300 rounded-lg transition">
+                    Volver
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+        <div *ngIf="loading" class="text-center py-12">
+            <div class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+            <p class="mt-4 text-gray-600">Cargando envíos...</p>
+        </div>
+
+        <div *ngIf="!loading">
+            <!-- Estadísticas -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+                <div class="bg-white p-6 rounded-lg shadow-sm">
+                    <p class="text-gray-600 text-sm">Total Envíos</p>
+                    <p class="text-3xl font-bold text-gray-900">{{ submissions.length }}</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-sm">
+                    <p class="text-gray-600 text-sm">Calificados</p>
+                    <p class="text-3xl font-bold text-green-600">{{ getGradedCount() }}</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-sm">
+                    <p class="text-gray-600 text-sm">Pendientes</p>
+                    <p class="text-3xl font-bold text-yellow-600">{{ getPendingCount() }}</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-sm">
+                    <p class="text-gray-600 text-sm">Promedio</p>
+                    <p class="text-3xl font-bold text-blue-600">{{ getAverageScore() }}</p>
+                </div>
+            </div>
+
+            <!-- Lista de Envíos -->
+            <div class="bg-white rounded-lg shadow-sm overflow-hidden">
+                <div class="px-6 py-4 border-b border-gray-200">
+                    <h2 class="text-xl font-bold text-gray-900">Envíos de Estudiantes</h2>
+                </div>
+
+                <div *ngIf="submissions.length === 0" class="text-center py-12">
+                    <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4">
+                        </path>
+                    </svg>
+                    <h3 class="mt-2 text-sm font-medium text-gray-900">No hay envíos</h3>
+                    <p class="mt-1 text-sm text-gray-500">Los estudiantes aún no han enviado esta evaluación</p>
+                </div>
+
+                <div class="divide-y divide-gray-200">
+                    <div *ngFor="let submission of submissions" class="p-6 hover:bg-gray-50 transition">
+                        <div class="flex items-start justify-between mb-4">
+                            <div class="flex items-center gap-4">
+                                <div class="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center">
+                                    <span class="text-blue-600 font-semibold">{{ getInitials(submission.student_name)
+                                        }}</span>
+                                </div>
+                                <div>
+                                    <h4 class="font-semibold text-gray-900">{{ submission.student_name }}</h4>
+                                    <p class="text-sm text-gray-600">{{ submission.student_email }}</p>
+                                    <p class="text-xs text-gray-500">Enviado: {{ submission.submitted_at | date:'short'
+                                        }}</p>
+                                </div>
+                            </div>
+
+                            <span class="px-3 py-1 text-sm rounded-full" [ngClass]="{
+                          'bg-green-100 text-green-800': submission.status === 'graded',
+                          'bg-yellow-100 text-yellow-800': submission.status === 'pending'
+                        }">
+                                {{ submission.status === 'graded' ? 'Calificado' : 'Pendiente' }}
+                            </span>
+                        </div>
+
+                        <!-- Respuestas -->
+                        <div class="bg-gray-50 rounded-lg p-4 mb-4">
+                            <h5 class="font-semibold text-gray-900 mb-3">Respuestas:</h5>
+                            <div class="space-y-3">
+                                <div *ngFor="let question of getQuestions(submission)" class="text-sm">
+                                    <p class="font-medium text-gray-700 mb-1">{{ question.text }}</p>
+                                    <p class="text-gray-600 bg-white px-3 py-2 rounded">{{ question.answer }}</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Calificación -->
+                        <div *ngIf="submission.status === 'pending'" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">
+                                    Calificación (de {{ assessment?.max_score }})
+                                </label>
+                                <input type="number" [(ngModel)]="submission.tempScore"
+                                    [ngModel]="submission.tempScore ?? 0" [min]="0" [max]="assessment?.max_score ?? 100"
+                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" />
+
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">
+                                    Retroalimentación
+                                </label>
+                                <textarea [(ngModel)]="submission.tempFeedback" rows="3"
+                                    placeholder="Comentarios para el estudiante..."
+                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none resize-none">
+                    </textarea>
+                            </div>
+                            <div class="md:col-span-2">
+                                <button (click)="gradeSubmission(submission)" [disabled]="!submission.tempScore"
+                                    class="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 disabled:opacity-50 transition font-semibold">
+                                    Calificar
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Calificación Existente -->
+                        <div *ngIf="submission.status === 'graded'"
+                            class="bg-green-50 border border-green-200 rounded-lg p-4">
+                            <div class="flex justify-between items-start mb-2">
+                                <div>
+                                    <p class="text-sm text-green-700 font-semibold">Calificación:</p>
+                                    <p class="text-2xl font-bold text-green-600">
+                                        {{ submission.score }} / {{ assessment?.max_score }}
+                                    </p>
+                                </div>
+                                <p class="text-sm text-green-600">
+                                    {{ calculatePercentage(submission.score!, assessment?.max_score!) }}%
+                                </p>
+                            </div>
+                            <p class="text-sm text-green-700" *ngIf="submission.feedback">
+                                <strong>Retroalimentación:</strong> {{ submission.feedback }}
+                            </p>
+                            <p class="text-xs text-green-600 mt-2">
+                                Calificado: {{ submission.graded_at | date:'short' }}
+                            </p>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </main>
+</div>
