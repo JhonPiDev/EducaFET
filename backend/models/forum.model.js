@@ -104,5 +104,26 @@ export const ForumModel = {
   async deleteReply(id) {
     const [result] = await db.query('DELETE FROM forum_replies WHERE id = ?', [id]);
     return result.affectedRows > 0;
-  }
+  },
+  // Agregar este método al ForumModel existente:
+
+async getRecentTopics(limit = 10) {
+  const [rows] = await db.query(`
+    SELECT 
+      t.*,
+      u.nombre as author_name,
+      u.rol as author_role,
+      c.nombre as course_name,
+      COUNT(DISTINCT r.id) as replies_count,
+      MAX(r.created_at) as last_reply_at
+    FROM forum_topics t
+    JOIN users u ON t.user_id = u.id
+    JOIN courses c ON t.course_id = c.id
+    LEFT JOIN forum_replies r ON t.id = r.topic_id
+    GROUP BY t.id
+    ORDER BY t.updated_at DESC
+    LIMIT ?
+  `, [limit]);
+  return rows;
+},
 };

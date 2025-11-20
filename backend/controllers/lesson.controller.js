@@ -21,22 +21,41 @@ export const LessonController = {
     }
   },
 
-  // Obtener lección por ID
-  async getLessonById(req, res) {
-    try {
-      const { id } = req.params;
-      const lesson = await LessonModel.findById(id);
+async getLessonById(req, res) {
+  try {
+    const { id } = req.params;
+    const userId = req.user.id;
 
-      if (!lesson) {
-        return res.status(404).json({ message: 'Lección no encontrada' });
-      }
-
-      res.json(lesson);
-    } catch (error) {
-      console.error(error);
-      res.status(500).json({ message: 'Error al obtener lección' });
+    // Obtener la lección
+    const lesson = await LessonModel.findById(id);
+    if (!lesson) {
+      return res.status(404).json({ message: 'Lección no encontrada' });
     }
-  },
+
+    // Si es estudiante obtener su progreso
+    let completed = false;
+    let completed_at = null;
+
+    if (req.user.rol === 'estudiante') {
+      const progress = await LessonModel.getStudentLessonProgress(userId, id);
+
+      if (progress) {
+        completed = progress.completed === 1;
+        completed_at = progress.completed_at;
+      }
+    }
+
+    // Añadir campos extra
+    lesson.completed = completed;
+    lesson.completed_at = completed_at;
+
+    res.json(lesson);
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Error al obtener lección' });
+  }
+},
 
   // Crear lección (solo docentes)
   async createLesson(req, res) {

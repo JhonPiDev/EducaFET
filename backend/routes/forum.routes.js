@@ -3,7 +3,7 @@ import { ForumController } from '../controllers/forum.controller.js';
 import { authMiddleware } from '../middleware/auth.middleware.js';
 
 const router = express.Router();
-
+router.get('/recent', authMiddleware, ForumController.getRecentTopics);
 // Obtener temas de un curso
 router.get('/course/:courseId', authMiddleware, ForumController.getTopicsByCourse);
 

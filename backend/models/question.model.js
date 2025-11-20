@@ -12,21 +12,34 @@ export const QuestionModel = {
     return { id: result.insertId, assessment_id, question_text };
   },
 
-  // Obtener preguntas de una evaluación
-  async findByAssessment(assessmentId) {
-    const [rows] = await db.query(`
-      SELECT * FROM questions 
-      WHERE assessment_id = ? 
-      ORDER BY id ASC
-    `, [assessmentId]);
-    
-    // Parsear opciones JSON
-    return rows.map(row => ({
-      ...row,
-      options: row.options ? JSON.parse(row.options) : null
-    }));
-  },
+// Obtener preguntas de una evaluación
+async findByAssessment(assessmentId) {
+  const [rows] = await db.query(`
+    SELECT * FROM questions 
+    WHERE assessment_id = ? 
+    ORDER BY id ASC
+  `, [assessmentId]);
 
+  return rows.map(row => {
+    let parsedOptions = null;
+
+    if (row.options) {
+      try {
+        // Intentar parsear como JSON primero
+        parsedOptions = JSON.parse(row.options);
+      } catch (e) {
+        // Si no es JSON, dividir por coma
+        parsedOptions = row.options.split(',').map(opt => opt.trim());
+      }
+    }
+
+    return {
+      ...row,
+      options: parsedOptions
+    };
+  });
+}
+,
   // Actualizar pregunta
   async update(id, data) {
     const fields = [];

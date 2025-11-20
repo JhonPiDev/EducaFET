@@ -110,5 +110,34 @@ export const CourseModel = {
       ORDER BY e.enrollment_date DESC
     `, [studentId]);
     return rows;
-  }
+  },
+  // Obtener progreso real del estudiante en un curso
+async getCourseProgress(studentId, courseId) {
+  // Total de lecciones del curso
+  const [[total]] = await db.query(
+    `SELECT COUNT(*) AS total FROM lessons WHERE course_id = ?`,
+    [courseId]
+  );
+
+  // Lecciones completadas por el estudiante
+  const [[completed]] = await db.query(
+    `SELECT COUNT(*) AS completed 
+     FROM lesson_progress 
+     WHERE student_id = ? 
+     AND lesson_id IN (SELECT id FROM lessons WHERE course_id = ?)`,
+    [studentId, courseId]
+  );
+
+  const totalLessons = total.total;
+  const completedLessons = completed.completed;
+
+  return {
+    totalLessons,
+    completedLessons,
+    completionRate:
+      totalLessons === 0 ? 0 : Math.round((completedLessons / totalLessons) * 100),
+    completed: completedLessons === totalLessons && totalLessons > 0
+  };
+}
+
 };

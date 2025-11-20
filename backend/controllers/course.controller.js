@@ -201,14 +201,24 @@ async checkEnrollment(req, res) {
 
       // Agregar detalles adicionales
       const coursesWithDetails = await Promise.all(
-        courses.map(async (course) => {
-          const lessonCount = await LessonModel.countByCourse(course.id);
-          return {
-            ...course,
-            total_lessons: lessonCount
-          };
-        })
-      );
+  courses.map(async (course) => {
+    let progress = { totalLessons: 0, completedLessons: 0, completionRate: 0, completed: false };
+
+    // Solo estudiantes tienen progreso
+    if (req.user.rol === 'estudiante') {
+      progress = await CourseModel.getCourseProgress(req.user.id, course.id);
+    }
+
+    return {
+      ...course,
+      total_lessons: progress.totalLessons,
+      completed_lessons: progress.completedLessons,
+      completionRate: progress.completionRate,
+      completed: progress.completed
+    };
+  })
+);
+
 
       res.json(coursesWithDetails);
     } catch (error) {

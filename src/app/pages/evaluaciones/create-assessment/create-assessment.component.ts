@@ -156,16 +156,33 @@ export class CreateAssessmentComponent implements OnInit {
     console.log('🧩 Preguntas procesadas:', processedQuestions);
 
     this.assessmentService.createAssessment(assessmentData).subscribe({
-      next: (response) => {
-        console.log('✅ Respuesta del backend:', response);
-        alert('Evaluación creada exitosamente');
-        this.router.navigate(['/dashboard/docente']);
-      },
-      error: (error) => {
-        console.error('Error al crear evaluación:', error);
-        this.errorMessage = error.error?.message || 'Error al crear la evaluación';
-        this.loading = false;
-      }
-    });
+next: (response) => {
+  const stored = JSON.parse(sessionStorage.getItem('assessments') || '[]');
+
+  const evaluationToStore = {
+  ...response,
+  assessment: {
+    ...response.assessment,
+    questions: processedQuestions   // 👈 GUARDAR LAS PREGUNTAS AQUÍ
+  }
+};
+
+stored.push(evaluationToStore);
+
+sessionStorage.setItem('assessments', JSON.stringify(stored));
+
+
+  sessionStorage.setItem('assessments', JSON.stringify(stored));
+
+  alert('Evaluación creada exitosamente');
+  this.router.navigate(['/dashboard/docente']);
+},
+  error: (error) => {
+    console.error('Error al crear evaluación:', error);
+    this.errorMessage = error.error?.message || 'Error al crear la evaluación';
+    this.loading = false;
+  }
+});
+
   }
 }

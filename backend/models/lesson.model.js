@@ -1,6 +1,7 @@
 import { db } from '../config/db.js';
 
 export const LessonModel = {
+  
   // Obtener lecciones de un curso
   async findByCourse(courseId) {
     const [rows] = await db.query(`
@@ -75,6 +76,33 @@ export const LessonModel = {
     
     return result.affectedRows > 0;
   },
+
+
+// Obtener progreso de UNA lección del estudiante
+async getStudentLessonProgress(studentId, lessonId) {
+  const [rows] = await db.query(
+    `SELECT completed, completed_at
+     FROM lesson_progress
+     WHERE student_id = ? AND lesson_id = ?
+     LIMIT 1`,
+    [studentId, lessonId]
+  );
+
+  return rows[0] || null;
+},
+
+async getUncompletedLessons(studentId) {
+  const [rows] = await db.query(`
+    SELECT l.id, l.title, l.course_id, l.order_num
+    FROM lessons l
+    LEFT JOIN lesson_progress lp
+      ON lp.lesson_id = l.id AND lp.student_id = ?
+    WHERE lp.completed IS NULL OR lp.completed = 0
+    ORDER BY l.order_num ASC
+  `, [studentId]);
+
+  return rows;
+},
 
   // Obtener progreso de lecciones de un estudiante
   async getStudentProgress(studentId, courseId) {

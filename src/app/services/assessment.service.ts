@@ -138,4 +138,12 @@ export class AssessmentService {
     if (maxScore === 0) return 0;
     return Math.round((score / maxScore) * 100);
   }
+  // En assessment.service.ts
+getAssessmentsWithPendingSubmissions(): Observable<Assessment[]> {
+  return this.http.get<Assessment[]>(`${this.apiUrl}/pending-submissions`);
+}
+
+getPendingSubmissions(): Observable<number> {
+  return this.http.get<number>(`${this.apiUrl}/pending-count`);
+}
 }

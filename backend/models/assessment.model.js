@@ -41,23 +41,26 @@ export const AssessmentModel = {
 
   // Obtener evaluaciones pendientes de un estudiante
   async findPendingByStudent(studentId) {
-    const [rows] = await db.query(`
-      SELECT a.*, c.name as course_name, c.teacher_id,
-             COUNT(s.id) as attempts_made
-      FROM assessments a
-      JOIN courses c ON a.course_id = c.id
-      JOIN enrollments e ON c.id = e.course_id
-      LEFT JOIN submissions s ON a.id = s.assessment_id AND s.student_id = ?
-      WHERE e.student_id = ? 
-        AND a.status = 'active'
-        AND (a.due_date IS NULL OR a.due_date >= NOW())
-        AND (s.id IS NULL OR s.status != 'graded')
-      GROUP BY a.id
-      HAVING COUNT(s.id) < a.attempts_allowed OR a.attempts_allowed IS NULL
-      ORDER BY a.due_date ASC
-    `, [studentId, studentId]);
-    return rows;
-  },
+  const [rows] = await db.query(`
+    SELECT 
+      a.*,
+      c.name AS course_name,
+      COUNT(s.id) AS attempts_made
+    FROM assessments a
+    JOIN courses c ON a.course_id = c.id
+    JOIN enrollments e ON e.course_id = c.id
+    LEFT JOIN submissions s 
+      ON s.assessment_id = a.id AND s.student_id = ?
+    WHERE 
+      e.student_id = ?
+      AND a.status = 'active'
+      AND (a.due_date IS NULL OR a.due_date >= NOW())
+    GROUP BY a.id
+    HAVING attempts_made < a.attempts_allowed
+  `, [studentId, studentId]);
+
+  return rows;
+},
 
   // Actualizar evaluación
   async update(id, data) {

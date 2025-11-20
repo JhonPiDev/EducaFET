@@ -13,6 +13,16 @@ export const ForumController = {
       res.status(500).json({ message: 'Error al obtener temas' });
     }
   },
+  async getRecentTopics(req, res) {
+  try {
+    const limit = parseInt(req.query.limit) || 10;
+    const topics = await ForumModel.getRecentTopics(limit);
+    res.json(topics);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Error al obtener temas recientes' });
+  }
+},
 
   // Obtener tema por ID con respuestas
   async getTopicById(req, res) {

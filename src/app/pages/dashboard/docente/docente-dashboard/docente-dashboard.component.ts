@@ -4,6 +4,7 @@ import { RouterModule, RouterLink, Router } from '@angular/router';
 import { AuthService, User } from '../../../../services/auth.service';
 import { CourseService } from '../../../../services/course.service';
 import { Course } from '../../../../models/course.model';
+import { AssessmentService } from '../../../../services/assessment.service';
 
 interface DashboardStats {
   activeCourses: number;
@@ -22,6 +23,8 @@ export class DocenteDashboardComponent implements OnInit {
   user: User | null = null;
   courses: Course[] = [];
   loading = true;
+  pendingAssessments: any[] = [];
+
   
   stats: DashboardStats = {
     activeCourses: 0,
@@ -35,13 +38,24 @@ export class DocenteDashboardComponent implements OnInit {
   constructor(
     private authService: AuthService,
     private courseService: CourseService,
-    private router: Router
+    private assessmentService: AssessmentService,
+    public router: Router
   ) {}
 
   ngOnInit(): void {
     this.user = this.authService.getCurrentUser();
     this.loadMyCourses();
+    this.loadPendingSubmissions();
   }
+  // Agregar en el ngOnInit o en un método separado
+loadPendingSubmissions(): void {
+  this.assessmentService.getPendingSubmissions().subscribe({
+    next: (count) => {
+      this.stats.pendingReviews = count;
+    },
+    error: (error) => console.error('Error:', error)
+  });
+}
 
   loadMyCourses(): void {
     this.loading = true;

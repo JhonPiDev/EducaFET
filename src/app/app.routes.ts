@@ -15,6 +15,8 @@ import { CreateCourseComponent } from './pages/cursos/create-course/create-cours
 import { LessonViewComponent } from './pages/lessons/lesson-view/lesson-view.component';
 import { CreateLessonComponent } from './pages/lessons/create-lesson/create-lesson.component';
 import { GradeSubmissionsComponent } from './pages/evaluaciones/grade-submissions/grade-submissions.component';
+import { EvaluacionesListComponent } from './pages/evaluaciones/evaluaciones-list/evaluaciones-list.component';
+import { ForumComponent } from './pages/cursos/forum/forum.component';
 
 export const routes: Routes = [
   // Ruta principal - home
@@ -47,13 +49,24 @@ export const routes: Routes = [
   { path: 'cursos/:courseId/lecciones/crear', component: CreateLessonComponent },
   // Calificar entregas (docente)
   { path: 'evaluaciones/:id/calificar', component: GradeSubmissionsComponent },
+  // Evaluaciones
+{
+  path: 'evaluaciones',
+  component: EvaluacionesListComponent
+},
+{
+  path: 'take-assessment/:id',
+  component: TakeAssessmentComponent
+},
 
- 
+  // Foro del curso
+  { path : 'foros', component: ForumComponent },
+
   // Perfil de usuario
   // ✅ Ruta del perfil
   { path: 'perfil/:id', loadComponent: () => import('./pages/perfil/perfil.component').then(m => m.PerfilComponent) },
   // Tomar evaluación
-  { path: 'evaluaciones', component: TakeAssessmentComponent },
+
 
 
   // Ruta comodín - debe ir siempre al final

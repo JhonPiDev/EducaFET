@@ -130,7 +130,6 @@ export class LoginComponent implements OnInit, OnDestroy {
     this.showPassword = !this.showPassword;
   }
 
-  /** Éxito en login */
 private handleLoginSuccess(response: any): void {
   const user = response.user;
   console.log('Login exitoso:', user);
@@ -140,12 +139,18 @@ private handleLoginSuccess(response: any): void {
     return;
   }
 
-  // Guarda el ID o token si lo necesitas
-  sessionStorage.setItem('userId', user.id);
+  // Guardar usuario completo para el foro y toda la app
+  sessionStorage.setItem('user', JSON.stringify({
+    id: user.id,
+    name: user.name,
+    email: user.email,
+    role: user.role
+  }));
 
-  // Redirige al dashboard correspondiente
+  // Redirige según el rol
   this.redirectToDashboard(user.role);
 }
+
 private redirectToDashboard(role: string): void {
   switch (role) {
     case 'estudiante':
