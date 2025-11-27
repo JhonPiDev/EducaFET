@@ -116,8 +116,12 @@
               class="flex items-center p-4 border rounded-lg cursor-pointer hover:bg-gray-50 transition"
               [class.border-blue-500]="answers[i] === option" [class.bg-blue-50]="answers[i] === option">
 
-              <input type="radio" [name]="'question-' + i" [value]="option" [(ngModel)]="answers[i]"
-                class="w-4 h-4 text-blue-600">
+<input type="radio"
+       [name]="'question-' + question.id"
+       [value]="option"
+       [(ngModel)]="answers[question.id]"
+       class="w-4 h-4 text-blue-600">
+
 
               <span class="ml-3 text-gray-800">{{ option }}</span>
             </label>
@@ -132,8 +136,11 @@
             <label class="flex items-center p-4 border rounded-lg cursor-pointer hover:bg-gray-50 transition"
               [class.border-blue-500]="answers[i] === 'Verdadero'" [class.bg-blue-50]="answers[i] === 'Verdadero'">
 
-              <input type="radio" [name]="'question-' + i" value="Verdadero" [(ngModel)]="answers[i]"
-                class="w-4 h-4 text-blue-600">
+<input type="radio"
+       [name]="'question-' + question.id"
+       value="Verdadero"
+       [(ngModel)]="answers[question.id]">
+
 
               <span class="ml-3 text-gray-800">Verdadero</span>
             </label>
@@ -141,8 +148,11 @@
             <label class="flex items-center p-4 border rounded-lg cursor-pointer hover:bg-gray-50 transition"
               [class.border-blue-500]="answers[i] === 'Falso'" [class.bg-blue-50]="answers[i] === 'Falso'">
 
-              <input type="radio" [name]="'question-' + i" value="Falso" [(ngModel)]="answers[i]"
-                class="w-4 h-4 text-blue-600">
+<input type="radio"
+       [name]="'question-' + question.id"
+       value="Falso"
+       [(ngModel)]="answers[question.id]">
+
 
               <span class="ml-3 text-gray-800">Falso</span>
             </label>
@@ -153,8 +163,11 @@
           <!-- ✏️ RESPUESTA CORTA -->
           <!-- ============================= -->
           <div *ngIf="question.question_type === 'short_answer'">
-            <input type="text" [(ngModel)]="answers[i]" placeholder="Escribe tu respuesta..."
-              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none">
+<input type="text"
+       [(ngModel)]="answers[question.id]"
+       placeholder="Escribe tu respuesta..."
+       class="w-full px-4 py-3 border rounded-lg">
+
           </div>
 
           <!-- ============================= -->
@@ -166,7 +179,8 @@
   </textarea>
 
             <p class="text-sm text-gray-500 mt-2">
-              {{ (answers[i]?.length || 0) }} caracteres
+{{ (answers[i] || '').length }} caracteres
+
             </p>
           </div>
 

@@ -1,0 +1,161 @@
+<div class="results-container">
+  <div class="results-header">
+    <h1>📊 Resultados de Evaluaciones</h1>
+    <div class="header-actions">
+      <button class="btn-export" (click)="exportToCSV()" *ngIf="filteredSubmissions.length > 0">
+        📥 Exportar CSV
+      </button>
+      <button class="btn-danger" (click)="clearAllResults()" *ngIf="submissions.length > 0">
+        🗑️ Limpiar Todo
+      </button>
+    </div>
+  </div>
+
+  <!-- Estadísticas Generales -->
+  <div class="stats-cards" *ngIf="submissions.length > 0">
+    <div class="stat-card">
+      <div class="stat-icon">📝</div>
+      <div class="stat-info">
+        <h3>{{ filteredSubmissions.length }}</h3>
+        <p>Entregas Totales</p>
+      </div>
+    </div>
+
+    <div class="stat-card success">
+      <div class="stat-icon">✅</div>
+      <div class="stat-info">
+        <h3>{{ getPassedCount() }}</h3>
+        <p>Aprobados</p>
+      </div>
+    </div>
+
+    <div class="stat-card danger">
+      <div class="stat-icon">❌</div>
+      <div class="stat-info">
+        <h3>{{ getFailedCount() }}</h3>
+        <p>Reprobados</p>
+      </div>
+    </div>
+
+    <div class="stat-card info">
+      <div class="stat-icon">📈</div>
+      <div class="stat-info">
+        <h3>{{ getAverageScore() }}%</h3>
+        <p>Promedio General</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filtros -->
+  <div class="filters-section">
+    <div class="filter-group">
+      <label>🔍 Buscar Estudiante:</label>
+      <input 
+        type="text" 
+        [(ngModel)]="searchStudent" 
+        (ngModelChange)="applyFilters()"
+        placeholder="Nombre o email..."
+        class="filter-input"
+      >
+    </div>
+
+    <div class="filter-group">
+      <label>📚 Evaluación:</label>
+      <select [(ngModel)]="selectedAssessment" (ngModelChange)="applyFilters()" class="filter-select">
+        <option value="all">Todas las evaluaciones</option>
+        <option *ngFor="let assessment of assessmentsList" [value]="assessment">
+          {{ assessment }}
+        </option>
+      </select>
+    </div>
+
+    <div class="filter-group">
+      <label>📊 Estado:</label>
+      <select [(ngModel)]="filterStatus" (ngModelChange)="applyFilters()" class="filter-select">
+        <option value="all">Todos</option>
+        <option value="passed">Aprobados</option>
+        <option value="failed">Reprobados</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  <div class="loading-container" *ngIf="loading">
+    <div class="spinner"></div>
+    <p>Cargando resultados...</p>
+  </div>
+
+  <!-- No hay resultados -->
+  <div class="no-results" *ngIf="!loading && submissions.length === 0">
+    <div class="empty-icon">📭</div>
+    <h2>No hay resultados aún</h2>
+    <p>Los estudiantes aún no han completado ninguna evaluación.</p>
+  </div>
+
+  <!-- Tabla de Resultados -->
+  <div class="results-table-container" *ngIf="!loading && filteredSubmissions.length > 0">
+    <table class="results-table">
+      <thead>
+        <tr>
+          <th>Estudiante</th>
+          <th>Evaluación</th>
+          <th>Puntaje</th>
+          <th>Porcentaje</th>
+          <th>Estado</th>
+          <th>Fecha</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let submission of filteredSubmissions">
+          <td>
+            <div class="student-info">
+              <strong>{{ submission.studentName }}</strong>
+              <small>{{ submission.studentEmail }}</small>
+            </div>
+          </td>
+          <td>{{ submission.assessmentTitle }}</td>
+          <td>
+            <strong>{{ submission.score }}</strong> / {{ submission.maxScore }}
+            <br>
+            <small>{{ submission.correct }} de {{ submission.total }} correctas</small>
+          </td>
+          <td>
+            <span class="percentage-badge" [ngClass]="getStatusClass(submission.percentage)">
+              {{ submission.percentage }}%
+            </span>
+          </td>
+          <td>
+            <span class="status-badge" [ngClass]="getStatusClass(submission.percentage)">
+              {{ getStatusLabel(submission.percentage) }}
+            </span>
+          </td>
+          <td>
+            <small>{{ submission.submittedAt | date: 'dd/MM/yyyy HH:mm' }}</small>
+            <br>
+            <small class="time-taken">⏱️ {{ submission.timeTaken }}</small>
+          </td>
+          <td>
+<button 
+  class="btn-view" 
+  [routerLink]="[
+    '/submission-detail', 
+    submission.assessmentId, 
+    submission.studentId
+  ]">
+  👁️ Ver Detalles
+</button>
+
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- No hay resultados filtrados -->
+  <div class="no-results" *ngIf="!loading && submissions.length > 0 && filteredSubmissions.length === 0">
+    <div class="empty-icon">🔍</div>
+    <h2>No se encontraron resultados</h2>
+    <p>Intenta ajustar los filtros de búsqueda.</p>
+  </div>
+</div>

@@ -17,6 +17,8 @@ import { CreateLessonComponent } from './pages/lessons/create-lesson/create-less
 import { GradeSubmissionsComponent } from './pages/evaluaciones/grade-submissions/grade-submissions.component';
 import { EvaluacionesListComponent } from './pages/evaluaciones/evaluaciones-list/evaluaciones-list.component';
 import { ForumComponent } from './pages/cursos/forum/forum.component';
+import { AssessmentResultsComponent } from './pages/evaluaciones/assessment-results/assessment-results.component';
+import { SubmissionDetailComponent } from './pages/evaluaciones/submission-detail/submission-detail.component';
 
 export const routes: Routes = [
   // Ruta principal - home
@@ -58,6 +60,17 @@ export const routes: Routes = [
   path: 'take-assessment/:id',
   component: TakeAssessmentComponent
 },
+
+{
+ path: 'assessment-results',
+ component: AssessmentResultsComponent
+},
+{
+  path: 'submission-detail/:assessmentId/:studentId',
+  component: SubmissionDetailComponent
+},
+
+{ path: 'evaluaciones/:id', component: TakeAssessmentComponent },
 
   // Foro del curso
   { path : 'foros', component: ForumComponent },
