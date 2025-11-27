@@ -27,6 +27,7 @@ export class LoginComponent implements OnInit, OnDestroy {
     private authService: AuthService,
     private router: Router
   ) {}
+
   goToRegister(): void {
     this.router.navigate(['/register']);
   }
@@ -67,12 +68,7 @@ export class LoginComponent implements OnInit, OnDestroy {
   private checkIfAlreadyAuthenticated(): void {
     const user = this.authService.getCurrentUser();
     if (user) {
-      if (user.role === 'student') {
-        sessionStorage.setItem('studentId', user.id);
-        this.router.navigate(['/home']);
-      } else if (user.role === 'admin') {
-        this.router.navigate(['/dashboard']);
-      }
+      this.redirectToDashboard(user.role);
     }
   }
 
@@ -130,46 +126,42 @@ export class LoginComponent implements OnInit, OnDestroy {
     this.showPassword = !this.showPassword;
   }
 
-private handleLoginSuccess(response: any): void {
-  const user = response.user;
-  console.log('Login exitoso:', user);
+  private handleLoginSuccess(response: any): void {
+    const user = response.user;
+    console.log('Login exitoso:', user);
 
-  if (!user || !user.role) {
-    console.error('No se encontró el rol del usuario');
-    return;
+    if (!user || !user.role) {
+      console.error('No se encontró el rol del usuario');
+      this.errorMessage = 'Error al obtener datos del usuario';
+      return;
+    }
+
+    // El AuthService ya guardó el usuario, solo redirigimos
+    this.redirectToDashboard(user.role);
   }
 
-  // Guardar usuario completo para el foro y toda la app
-  sessionStorage.setItem('user', JSON.stringify({
-    id: user.id,
-    name: user.name,
-    email: user.email,
-    role: user.role
-  }));
-
-  // Redirige según el rol
-  this.redirectToDashboard(user.role);
-}
-
-private redirectToDashboard(role: string): void {
-  switch (role) {
-    case 'estudiante':
-    case 'student':
-      this.router.navigate(['/home']);
-      break;
-    case 'docente':
-    case 'teacher':
-      this.router.navigate(['/dashboard/docente']);
-      break;
-    case 'admin':
-      this.router.navigate(['/dashboard/admin']);
-      break;
-    default:
-      this.router.navigate(['/']);
+  private redirectToDashboard(role: string): void {
+    // Normalizar el rol a minúsculas para comparación
+    const normalizedRole = role.toLowerCase();
+    
+    switch (normalizedRole) {
+      case 'estudiante':
+      case 'student':
+        this.router.navigate(['/home']);
+        break;
+      case 'docente':
+      case 'teacher':
+        this.router.navigate(['/dashboard/docente']);
+        break;
+      case 'admin':
+      case 'administrador':
+        this.router.navigate(['/dashboard/admin']);
+        break;
+      default:
+        console.warn('Rol no reconocido:', role);
+        this.router.navigate(['/']);
+    }
   }
-}
-
-
 
   /** Error en login */
   private handleLoginError(error: any): void {

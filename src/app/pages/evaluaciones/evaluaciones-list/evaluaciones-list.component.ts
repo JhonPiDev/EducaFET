@@ -32,7 +32,7 @@ fetchEvaluations() {
     } else {
       this.evaluations = [];
     }
-    console.log("📦 Evaluaciones en sessionStorage:", this.evaluations);
+    console.log("📦 Evaluaciones :", this.evaluations);
 
 
     this.loading = false;

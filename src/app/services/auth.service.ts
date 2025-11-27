@@ -29,7 +29,7 @@ export interface SocialLoginResponse {
   providedIn: 'root'
 })
 export class AuthService {
-  private apiUrl = 'http://localhost:3000/api/auth'; // Cambia esto a tu API
+  private apiUrl = 'http://localhost:3000/api/auth';
   private currentUserSubject: BehaviorSubject<User | null>;
   public currentUser: Observable<User | null>;
   private tokenKey = 'auth_token';
@@ -66,8 +66,6 @@ export class AuthService {
    * Login con redes sociales (Google, Microsoft, etc.)
    */
   socialLogin(provider: 'google' | 'microsoft'): Observable<SocialLoginResponse> {
-    // En producción, esto debería abrir una ventana de OAuth
-    // Por ahora, simula una petición al backend
     return this.http.post<SocialLoginResponse>(`${this.apiUrl}/social-login`, {
       provider
     }).pipe(
@@ -88,10 +86,7 @@ export class AuthService {
    */
   logout(): void {
     // Limpiar storage
-    localStorage.removeItem(this.tokenKey);
-    localStorage.removeItem(this.userKey);
-    sessionStorage.removeItem(this.tokenKey);
-    sessionStorage.removeItem(this.userKey);
+    this.clearStorage();
 
     // Actualizar subject
     this.currentUserSubject.next(null);
@@ -147,7 +142,7 @@ export class AuthService {
    * Obtener el token actual
    */
   getToken(): string | null {
-    return localStorage.getItem(this.tokenKey) || sessionStorage.getItem(this.tokenKey);
+    return this.getFromStorage(this.tokenKey);
   }
 
   /**
@@ -182,8 +177,8 @@ export class AuthService {
   refreshToken(): Observable<LoginResponse> {
     return this.http.post<LoginResponse>(`${this.apiUrl}/refresh-token`, {}).pipe(
       tap(response => {
-        const storage = localStorage.getItem(this.tokenKey) ? localStorage : sessionStorage;
-        storage.setItem(this.tokenKey, response.token);
+        const rememberMe = !!localStorage.getItem(this.tokenKey);
+        this.saveToStorage(this.tokenKey, response.token, rememberMe);
       }),
       catchError(this.handleError)
     );
@@ -197,31 +192,96 @@ export class AuthService {
    * Manejar éxito de autenticación
    */
   private handleAuthSuccess(response: LoginResponse, rememberMe: boolean): void {
-    const storage = rememberMe ? localStorage : sessionStorage;
-    
-    // Guardar token
-    storage.setItem(this.tokenKey, response.token);
-    
-    // Guardar usuario
-    storage.setItem(this.userKey, JSON.stringify(response.user));
-    
-    // Actualizar subject
-    this.currentUserSubject.next(response.user);
+    try {
+      // Guardar token
+      this.saveToStorage(this.tokenKey, response.token, rememberMe);
+      
+      // Guardar usuario
+      this.saveToStorage(this.userKey, JSON.stringify(response.user), rememberMe);
+      
+      // Actualizar subject
+      this.currentUserSubject.next(response.user);
+      
+      console.log('Autenticación exitosa. Usuario guardado:', response.user);
+    } catch (error) {
+      console.error('Error al guardar datos de autenticación:', error);
+      // Si falla el storage, al menos actualizar el subject en memoria
+      this.currentUserSubject.next(response.user);
+    }
+  }
+
+  /**
+   * Guardar en storage con fallback
+   */
+  private saveToStorage(key: string, value: string, useLocalStorage: boolean): void {
+    try {
+      if (useLocalStorage) {
+        localStorage.setItem(key, value);
+      } else {
+        sessionStorage.setItem(key, value);
+      }
+    } catch (error) {
+      console.error(`Error al guardar en ${useLocalStorage ? 'localStorage' : 'sessionStorage'}:`, error);
+      
+      // Intentar con el otro storage como fallback
+      try {
+        if (useLocalStorage) {
+          sessionStorage.setItem(key, value);
+          console.warn('Usando sessionStorage como fallback');
+        } else {
+          localStorage.setItem(key, value);
+          console.warn('Usando localStorage como fallback');
+        }
+      } catch (fallbackError) {
+        console.error('Error en fallback storage:', fallbackError);
+        console.warn('Storage no disponible. Los datos solo estarán en memoria.');
+      }
+    }
+  }
+
+  /**
+   * Obtener del storage con fallback
+   */
+  private getFromStorage(key: string): string | null {
+    try {
+      return localStorage.getItem(key) || sessionStorage.getItem(key);
+    } catch (error) {
+      console.error('Error al leer del storage:', error);
+      return null;
+    }
   }
 
   /**
    * Obtener usuario del storage
    */
   private getUserFromStorage(): User | null {
-    const userStr = localStorage.getItem(this.userKey) || sessionStorage.getItem(this.userKey);
-    if (userStr) {
-      try {
+    try {
+      const userStr = this.getFromStorage(this.userKey);
+      if (userStr) {
         return JSON.parse(userStr);
-      } catch {
-        return null;
       }
+    } catch (error) {
+      console.error('Error al parsear usuario del storage:', error);
     }
     return null;
+  }
+
+  /**
+   * Limpiar todo el storage
+   */
+  private clearStorage(): void {
+    try {
+      localStorage.removeItem(this.tokenKey);
+      localStorage.removeItem(this.userKey);
+      sessionStorage.removeItem(this.tokenKey);
+      sessionStorage.removeItem(this.userKey);
+      
+      // Limpiar cualquier otra clave relacionada
+      sessionStorage.removeItem('user'); // Por si quedó de versiones anteriores
+      sessionStorage.removeItem('studentId');
+    } catch (error) {
+      console.error('Error al limpiar storage:', error);
+    }
   }
 
   /**
@@ -232,7 +292,8 @@ export class AuthService {
       const payload = JSON.parse(atob(token.split('.')[1]));
       const expirationDate = payload.exp * 1000;
       return Date.now() >= expirationDate;
-    } catch {
+    } catch (error) {
+      console.error('Error al verificar expiración del token:', error);
       return true;
     }
   }
@@ -244,15 +305,12 @@ export class AuthService {
     let errorMessage = 'Ocurrió un error inesperado';
 
     if (error.error instanceof ErrorEvent) {
-      // Error del cliente
       errorMessage = `Error: ${error.error.message}`;
     } else {
-      // Error del servidor
       errorMessage = error.error?.message || `Error ${error.status}: ${error.statusText}`;
     }
 
     console.error('Error en AuthService:', error);
     return throwError(() => error);
   }
-  
 }
