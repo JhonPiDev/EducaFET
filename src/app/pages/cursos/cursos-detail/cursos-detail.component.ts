@@ -118,4 +118,19 @@ export class CursoDetailComponent implements OnInit {
     if (this.lessons.length === 0) return 0;
     return Math.round((this.getCompletedLessonsCount() / this.lessons.length) * 100);
   }
+    /** 🔹 Cerrar sesión */
+  logout(): void {
+    if (confirm('¿Estás seguro de que deseas cerrar sesión?')) {
+      this.authService.logout();
+      this.router.navigate(['/login']);
+    }
+  }
+    /** 🔹 Obtener iniciales del nombre */
+  getInitials(name?: string): string {
+    if (!name) return 'U';
+    const parts = name.trim().split(' ');
+    if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase();
+    return parts[0][0].toUpperCase();
+  }
+
 }

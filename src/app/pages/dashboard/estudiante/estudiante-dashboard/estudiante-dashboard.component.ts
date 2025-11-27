@@ -50,6 +50,12 @@ export class EstudianteDashboardComponent implements OnInit {
 
   loading = true;
 
+  notificationCount = 0;
+  notifications: { type: string; message: string; date: string }[] = [];
+  showNotifications = false;
+  unreadCount = 0;
+
+
   stats = {
     activeCourses: 0,
     pendingAssignments: 0,
@@ -106,6 +112,55 @@ export class EstudianteDashboardComponent implements OnInit {
 
   this.stats.forumParticipation = repliesCount;
 }
+  // =======================
+  // NOTIFICACIONES
+  // =======================
+  loadNotifications() {
+    this.notifications = [];
+    this.notificationCount = 0;
+
+    this.countAssessmentNotifications();
+    this.countForumNotifications();
+    this.unreadCount = this.notificationCount;
+
+  }
+
+  countForumNotifications() {
+    const stored = sessionStorage.getItem('forumTopics');
+    if (!stored) return;
+
+    const topics: ForumTopicWithReplies[] = JSON.parse(stored);
+
+    topics.forEach(t => {
+      const newReplies = t.replies.filter(r => {
+        return r.author_id !== this.user?.id;  
+      });
+
+      newReplies.forEach(r => {
+        this.notifications.push({
+          type: 'foro',
+          message: `Nueva respuesta en: "${t.title}"`,
+          date: r.created_at
+        });
+      });
+
+      this.notificationCount += newReplies.length;
+    });
+  }
+
+  countAssessmentNotifications() {
+    const completed = JSON.parse(sessionStorage.getItem('completedAssessments') || '[]');
+
+    completed.forEach((a: any) => {
+      this.notifications.push({
+        type: 'evaluacion',
+        message: `Has completado la evaluación: ${a.title}`,
+        date: a.completed_at || new Date().toISOString()
+      });
+    });
+
+    this.notificationCount += completed.length;
+  }
 
 
   // =======================
@@ -130,6 +185,7 @@ loadDashboardData(): void {
 
       // 🔥 CALCULAR STATS AQUÍ
       this.calculateStats();
+      this.loadNotifications();
 
       this.loading = false;
     },
