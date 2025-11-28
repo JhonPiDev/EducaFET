@@ -262,7 +262,41 @@ button {
     color: #7f8c8d;
   }
 }
+  .actions-footer {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-top: 2rem;
 
+    button {
+      flex: 1;
+      padding: 1rem 2rem;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+
+      &.btn-secondary {
+        background: #6b7280;
+        color: white;
+
+        &:hover {
+          background: #4b5563;
+        }
+      }
+
+      &.btn-primary {
+        background: #3b82f6;
+        color: white;
+
+        &:hover {
+          background: #2563eb;
+        }
+      }
+    }
+  }
 @keyframes spin {
   to { transform: rotate(360deg); }
 }

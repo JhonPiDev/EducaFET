@@ -86,18 +86,20 @@
 
       <!-- Preguntas -->
       <div class="space-y-6">
-        <div *ngFor="let question of questions; let i = index" class="bg-white rounded-lg shadow-sm p-6 border-l-4"
-          [ngClass]="{
-                'border-green-500': answers[question.id],
-                'border-gray-300': !answers[question.id]
-              }">
+        <div *ngFor="let question of questions; let i = index"
+             class="bg-white rounded-lg shadow-sm p-6 border-l-4"
+             [ngClass]="{
+                  'border-green-500': answers[i] && answers[i].trim() !== '',
+                  'border-gray-300': !answers[i] || answers[i].trim() === ''
+                }">
 
           <!-- Pregunta Header -->
           <div class="flex justify-between items-start mb-4">
             <h3 class="text-lg font-semibold text-gray-900">
               Pregunta {{ i + 1 }}
-              <span class="text-sm font-normal text-gray-500 ml-2">({{ question.points }} punto{{ question.points > 1 ?
-                's' : ''}})</span>
+              <span class="text-sm font-normal text-gray-500 ml-2">
+                ({{ question.points }} punto{{ question.points > 1 ? 's' : ''}})
+              </span>
             </h3>
             <span class="px-2 py-1 text-xs bg-gray-100 text-gray-700 rounded">
               {{ getQuestionTypeLabel(question.question_type) }}
@@ -105,82 +107,117 @@
           </div>
 
           <!-- Texto de la pregunta -->
-          <p class="text-gray-800 mb-4">{{ question.question_text }}</p>
+          <p class="text-gray-800 mb-4 font-medium">{{ question.question_text }}</p>
 
-          <!-- ============================= -->
-          <!-- 🔵 SELECCIÓN MÚLTIPLE -->
-          <!-- ============================= -->
-          <div *ngIf="question.question_type === 'multiple_choice' && question.options" class="space-y-3">
-
-            <label *ngFor="let option of question.options; let j = index"
-              class="flex items-center p-4 border rounded-lg cursor-pointer hover:bg-gray-50 transition"
-              [class.border-blue-500]="answers[i] === option" [class.bg-blue-50]="answers[i] === option">
-
-<input type="radio"
-       [name]="'question-' + question.id"
-       [value]="option"
-       [(ngModel)]="answers[question.id]"
-       class="w-4 h-4 text-blue-600">
-
-
-              <span class="ml-3 text-gray-800">{{ option }}</span>
-            </label>
-
+          <!-- SELECCIÓN MÚLTIPLE -->
+          <div *ngIf="question.question_type === 'multiple_choice' && question.options">
+            <div class="space-y-2">
+              <div *ngFor="let option of question.options; let optIndex = index"
+                   class="p-4 border-2 rounded-lg transition-all cursor-pointer hover:bg-gray-50"
+                   [class.border-blue-500]="answers[i] === option"
+                   [class.bg-blue-50]="answers[i] === option"
+                   [class.border-gray-300]="answers[i] !== option"
+                   [class.bg-white]="answers[i] !== option"
+                   (click)="setAnswer(i, option)">
+                
+                <div class="flex items-center gap-3">
+                  <input 
+                    type="radio"
+                    [id]="'radio_' + i + '_' + optIndex"
+                    [name]="'pregunta_' + i"
+                    [value]="option"
+                    [checked]="answers[i] === option"
+                    (change)="setAnswer(i, option)"
+                    class="w-5 h-5 text-blue-600 focus:ring-2 focus:ring-blue-500"
+                  >
+                  <label [for]="'radio_' + i + '_' + optIndex" class="flex-1 cursor-pointer text-gray-800">
+                    {{ option }}
+                  </label>
+                  <span *ngIf="answers[i] === option" class="text-blue-600 font-bold text-xl">✓</span>
+                </div>
+              </div>
+            </div>
           </div>
 
-          <!-- ============================= -->
-          <!-- 🟢 VERDADERO / FALSO -->
-          <!-- ============================= -->
-          <div *ngIf="question.question_type === 'true_false'" class="space-y-3">
+          <!-- VERDADERO / FALSO -->
+          <div *ngIf="question.question_type === 'true_false'">
+            <div class="space-y-2">
+              <!-- Verdadero -->
+              <div class="p-4 border-2 rounded-lg transition-all cursor-pointer hover:bg-gray-50"
+                   [class.border-blue-500]="answers[i] === 'Verdadero'"
+                   [class.bg-blue-50]="answers[i] === 'Verdadero'"
+                   [class.border-gray-300]="answers[i] !== 'Verdadero'"
+                   [class.bg-white]="answers[i] !== 'Verdadero'"
+                   (click)="setAnswer(i, 'Verdadero')">
+                
+                <div class="flex items-center gap-3">
+                  <input 
+                    type="radio"
+                    [id]="'radio_' + i + '_true'"
+                    [name]="'pregunta_' + i"
+                    value="Verdadero"
+                    [checked]="answers[i] === 'Verdadero'"
+                    (change)="setAnswer(i, 'Verdadero')"
+                    class="w-5 h-5 text-blue-600 focus:ring-2 focus:ring-blue-500"
+                  >
+                  <label [for]="'radio_' + i + '_true'" class="flex-1 cursor-pointer text-gray-800">
+                    Verdadero
+                  </label>
+                  <span *ngIf="answers[i] === 'Verdadero'" class="text-blue-600 font-bold text-xl">✓</span>
+                </div>
+              </div>
 
-            <label class="flex items-center p-4 border rounded-lg cursor-pointer hover:bg-gray-50 transition"
-              [class.border-blue-500]="answers[i] === 'Verdadero'" [class.bg-blue-50]="answers[i] === 'Verdadero'">
-
-<input type="radio"
-       [name]="'question-' + question.id"
-       value="Verdadero"
-       [(ngModel)]="answers[question.id]">
-
-
-              <span class="ml-3 text-gray-800">Verdadero</span>
-            </label>
-
-            <label class="flex items-center p-4 border rounded-lg cursor-pointer hover:bg-gray-50 transition"
-              [class.border-blue-500]="answers[i] === 'Falso'" [class.bg-blue-50]="answers[i] === 'Falso'">
-
-<input type="radio"
-       [name]="'question-' + question.id"
-       value="Falso"
-       [(ngModel)]="answers[question.id]">
-
-
-              <span class="ml-3 text-gray-800">Falso</span>
-            </label>
-
+              <!-- Falso -->
+              <div class="p-4 border-2 rounded-lg transition-all cursor-pointer hover:bg-gray-50"
+                   [class.border-blue-500]="answers[i] === 'Falso'"
+                   [class.bg-blue-50]="answers[i] === 'Falso'"
+                   [class.border-gray-300]="answers[i] !== 'Falso'"
+                   [class.bg-white]="answers[i] !== 'Falso'"
+                   (click)="setAnswer(i, 'Falso')">
+                
+                <div class="flex items-center gap-3">
+                  <input 
+                    type="radio"
+                    [id]="'radio_' + i + '_false'"
+                    [name]="'pregunta_' + i"
+                    value="Falso"
+                    [checked]="answers[i] === 'Falso'"
+                    (change)="setAnswer(i, 'Falso')"
+                    class="w-5 h-5 text-blue-600 focus:ring-2 focus:ring-blue-500"
+                  >
+                  <label [for]="'radio_' + i + '_false'" class="flex-1 cursor-pointer text-gray-800">
+                    Falso
+                  </label>
+                  <span *ngIf="answers[i] === 'Falso'" class="text-blue-600 font-bold text-xl">✓</span>
+                </div>
+              </div>
+            </div>
           </div>
 
-          <!-- ============================= -->
-          <!-- ✏️ RESPUESTA CORTA -->
-          <!-- ============================= -->
+          <!-- RESPUESTA CORTA -->
           <div *ngIf="question.question_type === 'short_answer'">
-<input type="text"
-       [(ngModel)]="answers[question.id]"
-       placeholder="Escribe tu respuesta..."
-       class="w-full px-4 py-3 border rounded-lg">
-
+            <input 
+              type="text"
+              [(ngModel)]="answers[i]" 
+              [ngModelOptions]="{ standalone: true }"
+              (input)="setAnswer(i, answers[i])"
+              class="w-full p-3 border-2 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all"
+              placeholder="Escribe tu respuesta aquí..."
+            >
           </div>
 
-          <!-- ============================= -->
-          <!-- 📄 ENSAYO -->
-          <!-- ============================= -->
+          <!-- ENSAYO -->
           <div *ngIf="question.question_type === 'essay'">
-            <textarea [(ngModel)]="answers[i]" rows="6" placeholder="Escribe tu ensayo aquí..."
-              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none resize-none">
-  </textarea>
+            <textarea 
+              [(ngModel)]="answers[i]"
+              [ngModelOptions]="{ standalone: true }"
+              (input)="setAnswer(i, answers[i])"
+              class="w-full p-3 border-2 rounded-lg h-32 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all"
+              placeholder="Escribe tu respuesta..."
+            ></textarea>
 
             <p class="text-sm text-gray-500 mt-2">
-{{ (answers[i] || '').length }} caracteres
-
+              {{ (answers[i] || '').length }} caracteres
             </p>
           </div>
 
@@ -259,14 +296,13 @@
       <div *ngIf="submissionResult">
         <p class="text-gray-600 mb-6">{{ submissionResult.message }}</p>
 
-        <!-- Mostrar calificación si es quiz con calificación automática -->
         <div *ngIf="submissionResult.score !== undefined" class="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-6">
           <p class="text-sm text-blue-800 mb-2">Tu calificación</p>
           <p class="text-4xl font-bold text-blue-600">
-            {{ submissionResult.score }} / {{ submissionResult.max_score }}
+            {{ submissionResult.score }} / {{ submissionResult.maxScore }}
           </p>
           <p class="text-sm text-blue-700 mt-2">
-            {{ calculatePercentage(submissionResult.score, submissionResult.max_score) }}%
+            {{ submissionResult.percentage }}%
           </p>
         </div>
       </div>

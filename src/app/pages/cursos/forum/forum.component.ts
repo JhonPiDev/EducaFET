@@ -11,6 +11,7 @@ export interface ForumReply {
   content: string;
   author_name: string;
   author_id: string | null;
+  author_role?: string;
   created_at: string;
   is_solution?: boolean;
 }
@@ -22,6 +23,7 @@ export interface ForumTopic {
   content: string;
   author_name: string;
   author_id: string | null;
+  author_role?: string;
   created_at: string;
   replies: ForumReply[];
   replies_count: number;
@@ -52,8 +54,8 @@ export class ForumComponent implements OnInit {
   ngOnInit(): void {
     this.loading = true;
 
-    // Obtener usuario desde sessionStorage
-    const userData = sessionStorage.getItem('user');
+    // Obtener usuario desde storage según AuthService
+    const userData = sessionStorage.getItem('current_user') || localStorage.getItem('current_user');
     if (userData) {
       this.currentUser = JSON.parse(userData);
     } else {
@@ -98,6 +100,7 @@ export class ForumComponent implements OnInit {
       content: this.newTopicContent,
       author_name: this.currentUser.name,
       author_id: this.currentUser.id,
+      author_role: this.currentUser.role,
       created_at: new Date().toISOString(),
       replies: [],
       replies_count: 0
@@ -120,6 +123,7 @@ export class ForumComponent implements OnInit {
       content: this.newReplyContent,
       author_name: this.currentUser.name,
       author_id: this.currentUser.id,
+      author_role: this.currentUser.role,
       created_at: new Date().toISOString()
     };
 
@@ -139,9 +143,11 @@ export class ForumComponent implements OnInit {
         this.router.navigate(['/dashboard/estudiante']);
         break;
       case 'docente':
+      case 'teacher':
         this.router.navigate(['/dashboard/docente']);
         break;
       case 'admin':
+      case 'administrador':
         this.router.navigate(['/dashboard/admin']);
         break;
       default:

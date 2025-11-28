@@ -104,85 +104,74 @@ export class CreateAssessmentComponent implements OnInit {
     }
   }
 
-  onSubmit(): void {
-    if (this.assessmentForm.invalid || this.questions.length === 0) {
-      this.errorMessage = 'Por favor completa todos los campos requeridos y agrega al menos una pregunta';
-      return;
+onSubmit(): void {
+  if (this.assessmentForm.invalid || this.questions.length === 0) {
+    this.errorMessage = 'Por favor completa todos los campos requeridos y agrega al menos una pregunta';
+    return;
+  }
+
+  this.loading = true;
+  this.errorMessage = '';
+
+  const formValue = this.assessmentForm.value;
+
+  // Procesar preguntas
+  const processedQuestions = formValue.questions.map((q: any) => {
+    let options = null;
+
+    if (q.question_type === 'multiple_choice') {
+      options = q.options_text
+        .split('\n')
+        .map((opt: string) => opt.trim())
+        .filter((opt: string) => opt.length > 0);
+    } else if (q.question_type === 'true_false') {
+      options = ['Verdadero', 'Falso'];
     }
 
-    this.loading = true;
-    this.errorMessage = '';
+    return {
+      question_text: q.question_text,
+      question_type: q.question_type,
+      options: options,
+      correct_answer: q.correct_answer,
+      points: q.points
+    };
+  });
 
-    const formValue = this.assessmentForm.value;
+  // ============================
+  //  🔵 GENERAR ID LOCAL
+  // ============================
+  const localId = Date.now(); // ID único basado en tiempo
 
-    // Procesar preguntas
-    const processedQuestions = formValue.questions.map((q: any) => {
-      let options = null;
-
-      // Procesar opciones según el tipo
-      if (q.question_type === 'multiple_choice') {
-        // Convertir texto de opciones a array
-        options = q.options_text
-          .split('\n')
-          .map((opt: string) => opt.trim())
-          .filter((opt: string) => opt.length > 0);
-      } else if (q.question_type === 'true_false') {
-        options = ['Verdadero', 'Falso'];
-      }
-
-      return {
-        question_text: q.question_text,
-        question_type: q.question_type,
-        options: options,
-        correct_answer: q.correct_answer,
-        points: q.points
-      };
-    });
-
-    // Preparar datos para enviar
-    const assessmentData = {
-      course_id: formValue.course_id,
+  // Formar evaluación completa
+  const evaluationToStore = {
+    id: localId,
+    assessment: {
+      id: localId,
       title: formValue.title,
-      description: formValue.description,
+      description: formValue.description || "Sin descripción",
       type: formValue.type,
+      course_id: formValue.course_id,
       due_date: formValue.due_date || null,
       max_score: formValue.max_score,
       time_limit: formValue.time_limit || null,
       attempts_allowed: formValue.attempts_allowed,
       questions: processedQuestions
-    };
+    }
+  };
 
-    console.log('📦 Datos listos para enviar al backend:', assessmentData);
-    console.log('🧩 Preguntas procesadas:', processedQuestions);
-
-    this.assessmentService.createAssessment(assessmentData).subscribe({
-next: (response) => {
+  // ============================
+  //  🔵 GUARDAR EN sessionStorage
+  // ============================
   const stored = JSON.parse(sessionStorage.getItem('assessments') || '[]');
 
-  const evaluationToStore = {
-  ...response,
-  assessment: {
-    ...response.assessment,
-    questions: processedQuestions   // 👈 GUARDAR LAS PREGUNTAS AQUÍ
-  }
-};
-
-stored.push(evaluationToStore);
-
-sessionStorage.setItem('assessments', JSON.stringify(stored));
-
+  stored.push(evaluationToStore);
 
   sessionStorage.setItem('assessments', JSON.stringify(stored));
 
-  alert('Evaluación creada exitosamente');
-  this.router.navigate(['/dashboard/docente']);
-},
-  error: (error) => {
-    console.error('Error al crear evaluación:', error);
-    this.errorMessage = error.error?.message || 'Error al crear la evaluación';
-    this.loading = false;
-  }
-});
+  this.loading = false;
 
-  }
+  alert('Evaluación creada exitosamente (sessionStorage)');
+  this.router.navigate(['/dashboard/docente']);
+}
+
 }

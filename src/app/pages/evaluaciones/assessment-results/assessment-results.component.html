@@ -2,6 +2,9 @@
   <div class="results-header">
     <h1>📊 Resultados de Evaluaciones</h1>
     <div class="header-actions">
+            <button class="btn-secondary" (click)="goBack()">
+        Volver al dashboard
+      </button>
       <button class="btn-export" (click)="exportToCSV()" *ngIf="filteredSubmissions.length > 0">
         📥 Exportar CSV
       </button>
@@ -50,13 +53,8 @@
   <div class="filters-section">
     <div class="filter-group">
       <label>🔍 Buscar Estudiante:</label>
-      <input 
-        type="text" 
-        [(ngModel)]="searchStudent" 
-        (ngModelChange)="applyFilters()"
-        placeholder="Nombre o email..."
-        class="filter-input"
-      >
+      <input type="text" [(ngModel)]="searchStudent" (ngModelChange)="applyFilters()" placeholder="Nombre o email..."
+        class="filter-input">
     </div>
 
     <div class="filter-group">
@@ -136,15 +134,13 @@
             <small class="time-taken">⏱️ {{ submission.timeTaken }}</small>
           </td>
           <td>
-<button 
-  class="btn-view" 
-  [routerLink]="[
+            <button class="btn-view" [routerLink]="[
     '/submission-detail', 
     submission.assessmentId, 
     submission.studentId
   ]">
-  👁️ Ver Detalles
-</button>
+              👁️ Ver Detalles
+            </button>
 
           </td>
         </tr>

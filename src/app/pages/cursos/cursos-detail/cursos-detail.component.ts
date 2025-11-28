@@ -76,14 +76,38 @@ export class CursoDetailComponent implements OnInit {
     });
   }
 
-  loadEvaluations(courseId: string): void {
-    this.evaluationService.getEvaluationsByCourse(courseId).subscribe({
-      next: (evaluations) => {
-        this.evaluations = evaluations;
-      },
-      error: (error) => console.error('Error cargando evaluaciones:', error)
-    });
-  }
+loadEvaluations(courseId: string): void {
+  // 🔵 1. Cargar evaluaciones locales (creadas en sessionStorage)
+  const stored = JSON.parse(sessionStorage.getItem('assessments') || '[]');
+
+  // 🔵 Filtrar solo las del curso actual
+  const localEvaluationsForCourse = stored
+    .filter((ev: any) => ev.assessment?.course_id == courseId)
+    .map((ev: any) => ({
+      id: ev.assessment.id,
+      title: ev.assessment.title,
+      description: ev.assessment.description,
+      type: ev.assessment.type,
+      due_date: ev.assessment.due_date,
+      max_score: ev.assessment.max_score,
+      attempts_allowed: ev.assessment.attempts_allowed,
+      questions: ev.assessment.questions
+    }));
+
+  // 🔵 2. Intentar cargar desde el backend (si lo usas)
+  this.evaluationService.getEvaluationsByCourse(courseId).subscribe({
+    next: (evaluations) => {
+      // Mezclar evaluaciones del backend + locales
+      this.evaluations = [...evaluations, ...localEvaluationsForCourse];
+    },
+    error: () => {
+      // Si falla el backend, mostrar solo las locales
+      console.warn('⚠ Backend no disponible, usando solo sessionStorage');
+      this.evaluations = [...localEvaluationsForCourse];
+    }
+  });
+}
+
 
   enrollCourse(): void {
   if (!this.course) return;

@@ -7,9 +7,10 @@ import { ActivatedRoute, Router, RouterModule } from '@angular/router';
   standalone: true,
   imports: [CommonModule, RouterModule],
   templateUrl: './submission-detail.component.html',
-  styleUrl: './submission-detail.component.scss'
+  styleUrls: ['./submission-detail.component.scss']
 })
 export class SubmissionDetailComponent implements OnInit {
+
   submission: any = null;
   loading = true;
 
@@ -19,85 +20,88 @@ export class SubmissionDetailComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.loadSubmissionDetail();
+    const assessmentId = this.route.snapshot.params['assessmentId'];
+    const studentId = this.route.snapshot.params['studentId'];
+    
+    this.loadSubmissionDetail(assessmentId, studentId);
   }
 
-  loadSubmissionDetail(): void {
+  loadSubmissionDetail(assessmentId: string, studentId: string): void {
+    this.loading = true;
+
     try {
-      const submissionStr = sessionStorage.getItem('selected_submission');
+      // Obtener todas las submisiones de sessionStorage
+      const submissionsRaw = sessionStorage.getItem('assessment_submissions');
       
-      if (submissionStr) {
-        this.submission = JSON.parse(submissionStr);
-      } else {
-        // Si no hay submission seleccionada, buscar por parámetros de ruta
-        const assessmentId = this.route.snapshot.params['assessmentId'];
-        const studentId = this.route.snapshot.params['studentId'];
-        
-        if (assessmentId && studentId) {
-          this.findSubmission(assessmentId, studentId);
-        } else {
-          alert('No se encontró la información de la evaluación');
-          this.router.navigate(['/dashboard/docente/resultados']);
-        }
+      if (!submissionsRaw) {
+        alert('No se encontraron resultados');
+        this.router.navigate(['/assessment-results']);
+        return;
       }
+
+      const submissions = JSON.parse(submissionsRaw);
+      
+      // Buscar la submisión específica
+      const found = submissions.find((s: any) => 
+        s.assessmentId == assessmentId && s.studentId == studentId
+      );
+
+      if (!found) {
+        alert('No se encontró el detalle de esta evaluación');
+        this.router.navigate(['/assessment-results']);
+        return;
+      }
+
+      this.submission = found;
+      console.log('📄 Detalle de submisión cargado:', this.submission);
+      
     } catch (error) {
-      console.error('Error al cargar detalles:', error);
+      console.error('Error al cargar detalle:', error);
       alert('Error al cargar los detalles');
-      this.router.navigate(['/dashboard/docente/resultados']);
+      this.router.navigate(['/assessment-results']);
     } finally {
       this.loading = false;
     }
   }
 
-  findSubmission(assessmentId: string, studentId: string): void {
-    const submissionsStr = sessionStorage.getItem('assessment_submissions');
-    if (submissionsStr) {
-      const submissions = JSON.parse(submissionsStr);
-      this.submission = submissions.find(
-        (s: any) => s.assessmentId === assessmentId && s.studentId === studentId
-      );
-    }
-  }
-
   getStatusClass(percentage: number): string {
-    if (percentage >= 90) return 'status-excellent';
-    if (percentage >= 70) return 'status-good';
-    if (percentage >= 60) return 'status-pass';
-    return 'status-fail';
+    if (percentage >= 70) return 'success';
+    if (percentage >= 50) return 'warning';
+    return 'danger';
   }
 
   getStatusLabel(percentage: number): string {
-    if (percentage >= 90) return 'Excelente';
-    if (percentage >= 70) return 'Bueno';
-    if (percentage >= 60) return 'Aprobado';
+    if (percentage >= 70) return 'Aprobado';
+    if (percentage >= 50) return 'Suficiente';
     return 'Reprobado';
   }
 
-  getQuestionIcon(type: string): string {
-    const icons: any = {
-      'multiple_choice': '📝',
-      'true_false': '✓✗',
-      'short_answer': '✍️',
-      'essay': '📄'
-    };
-    return icons[type] || '❓';
+  getAnswerStatusClass(isCorrect: boolean): string {
+    return isCorrect ? 'correct' : 'incorrect';
   }
 
-  getQuestionTypeLabel(type: string): string {
-    const labels: any = {
-      'multiple_choice': 'Opción Múltiple',
-      'true_false': 'Verdadero/Falso',
-      'short_answer': 'Respuesta Corta',
-      'essay': 'Ensayo'
-    };
-    return labels[type] || type;
+  getAnswerStatusIcon(isCorrect: boolean): string {
+    return isCorrect ? '✅' : '❌';
   }
 
   goBack(): void {
-    this.router.navigate(['/dashboard/docente/resultados']);
+    this.router.navigate(['/assessment-results']);
   }
 
-  printResult(): void {
+  printResults(): void {
     window.print();
+  }
+
+  // ===============================================
+  // Función agregada para mostrar el tipo de pregunta
+  // ===============================================
+  getQuestionTypeLabel(type: string): string {
+    switch(type) {
+      case 'multiple-choice': return 'Opción múltiple';
+      case 'true-false': return 'Verdadero/Falso';
+      case 'short-answer': return 'Respuesta corta';
+      case 'essay': return 'Ensayo';
+      default: return 'Desconocido';
+    }
   }
 }

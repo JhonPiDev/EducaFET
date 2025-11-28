@@ -8,15 +8,16 @@
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h4l3-3m0 0l3 3H21m-6 4v7" />
       </svg>
       Volver al Dashboard
-</button>
-
+    </button>
   </div>
 
   <!-- Lista de temas -->
   <div *ngIf="!selectedTopic">
     <div class="flex justify-between items-center mb-6">
       <h1 class="text-4xl font-extrabold text-gray-800">Foro del curso</h1>
-      <span class="text-sm text-gray-500">Usuario: <span class="font-medium">{{ currentUser.name }}</span> ({{ currentUser.role }})</span>
+      <span class="text-sm text-gray-500">
+        Usuario: <span class="font-medium">{{ currentUser.name }}</span> ({{ currentUser.role }})
+      </span>
     </div>
 
     <!-- Crear nuevo tema -->
@@ -41,7 +42,9 @@
           <h3 class="font-semibold text-lg text-gray-800">{{ topic.title }}</h3>
           <span class="text-xs text-gray-500">{{ topic.replies_count }} respuestas</span>
         </div>
-        <p class="text-gray-600 text-sm mb-2">Autor: <span class="font-medium">{{ topic.author_name }}</span></p>
+        <p class="text-gray-600 text-sm mb-2">
+          Autor: <span class="font-medium">{{ topic.author_name }}</span> ({{ topic.author_role || currentUser.role }})
+        </p>
         <p class="text-gray-400 text-xs">Fecha: {{ topic.created_at | date:'short' }}</p>
       </div>
     </div>
@@ -57,19 +60,25 @@
         </svg>
         Volver a temas
       </button>
-      <span class="text-sm text-gray-500">Usuario: <span class="font-medium">{{ currentUser.name }}</span></span>
+      <span class="text-sm text-gray-500">
+        Usuario: <span class="font-medium">{{ currentUser.name }}</span> ({{ currentUser.role }})
+      </span>
     </div>
 
     <div class="bg-white p-6 rounded-2xl shadow-md mb-6 border-l-4 border-indigo-500 hover:shadow-xl transition">
       <h2 class="text-3xl font-bold mb-3 text-indigo-700">{{ selectedTopic.title }}</h2>
       <p class="text-gray-700 mb-3">{{ selectedTopic.content }}</p>
-      <p class="text-xs text-gray-400">Autor: {{ selectedTopic.author_name }} • {{ selectedTopic.created_at | date:'short' }}</p>
+      <p class="text-xs text-gray-400">
+        Autor: {{ selectedTopic.author_name }} ({{ selectedTopic.author_role || currentUser.role }}) • {{ selectedTopic.created_at | date:'short' }}
+      </p>
     </div>
 
     <!-- Respuestas -->
-    <div *ngFor="let reply of selectedTopic.replies" class="bg-gray-50 p-5 rounded-2xl shadow mb-4 border-l-4 border-green-400 hover:shadow-lg transition">
+    <div *ngFor="let reply of selectedTopic.replies"
+         class="bg-gray-50 p-5 rounded-2xl shadow mb-4 border-l-4 border-green-400 hover:shadow-lg transition">
       <p class="text-gray-700 mb-2">{{ reply.content }}</p>
-      <p class="text-xs text-gray-500">Por <span class="font-medium">{{ reply.author_name }}</span> • {{ reply.created_at | date:'short' }}
+      <p class="text-xs text-gray-500">
+        Por <span class="font-medium">{{ reply.author_name }}</span> ({{ reply.author_role || currentUser.role }}) • {{ reply.created_at | date:'short' }}
         <span *ngIf="reply.is_solution" class="text-green-600 font-semibold ml-2">(Solución)</span>
       </p>
     </div>

@@ -173,4 +173,7 @@ export class AssessmentResultsComponent implements OnInit {
   getFailedCount(): number {
     return this.filteredSubmissions.filter(sub => sub.percentage < 60).length;
   }
+    goBack(): void {
+    this.router.navigate(['/dashboard/docente']);
+  }
 }

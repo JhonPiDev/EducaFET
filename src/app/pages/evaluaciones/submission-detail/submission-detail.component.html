@@ -1,145 +1,169 @@
-<div class="detail-container" *ngIf="!loading && submission">
-  <!-- Header -->
-  <div class="detail-header">
-    <button class="btn-back" routerLink="/assessment-results">
-      ← Volver a Resultados
-    </button>
-    <button class="btn-print" (click)="printResult()">
-      🖨️ Imprimir
-    </button>
+<div class="submission-detail-container">
+  <!-- Loading -->
+  <div class="loading-container" *ngIf="loading">
+    <div class="spinner"></div>
+    <p>Cargando detalles...</p>
   </div>
 
-  <!-- Información General -->
-  <div class="info-card">
-    <h1>{{ submission.assessmentTitle }}</h1>
+  <!-- Contenido Principal -->
+  <div *ngIf="!loading && submission" class="detail-content">
     
-    <div class="info-grid">
-      <div class="info-item">
-        <span class="label">👤 Estudiante:</span>
-        <span class="value">{{ submission.studentName }}</span>
-      </div>
-      
-      <div class="info-item">
-        <span class="label">📧 Email:</span>
-        <span class="value">{{ submission.studentEmail }}</span>
-      </div>
-      
-      <div class="info-item">
-        <span class="label">📅 Fecha de Entrega:</span>
-        <span class="value">{{ submission.submittedAt | date: 'dd/MM/yyyy HH:mm' }}</span>
-      </div>
-      
-      <div class="info-item">
-        <span class="label">⏱️ Tiempo Utilizado:</span>
-        <span class="value">{{ submission.timeTaken }}</span>
-      </div>
-    </div>
-  </div>
-
-  <!-- Resumen de Calificación -->
-  <div class="score-summary">
-    <div class="score-card main-score">
-      <div class="score-icon">🎯</div>
-      <div class="score-info">
-        <h2>{{ submission.score }} / {{ submission.maxScore }}</h2>
-        <p>Puntaje Total</p>
-      </div>
+    <!-- Header -->
+    <div class="detail-header">
+      <button class="btn-back" (click)="goBack()">
+        ← Volver a Resultados
+      </button>
+      <h1>📋 Detalle de Evaluación</h1>
+      <button class="btn-print" (click)="printResults()">
+        🖨️ Imprimir
+      </button>
     </div>
 
-    <div class="score-card">
-      <div class="score-icon">📊</div>
-      <div class="score-info">
-        <h2 [ngClass]="getStatusClass(submission.percentage)">
-          {{ submission.percentage }}%
-        </h2>
-        <p>Porcentaje</p>
-      </div>
-    </div>
-
-    <div class="score-card">
-      <div class="score-icon">✓</div>
-      <div class="score-info">
-        <h2 class="status-good">{{ submission.correct }}</h2>
-        <p>Correctas</p>
-      </div>
-    </div>
-
-    <div class="score-card">
-      <div class="score-icon">✗</div>
-      <div class="score-info">
-        <h2 class="status-fail">{{ submission.total - submission.correct }}</h2>
-        <p>Incorrectas</p>
-      </div>
-    </div>
-
-    <div class="score-card status-card" [ngClass]="getStatusClass(submission.percentage)">
-      <h3>{{ getStatusLabel(submission.percentage) }}</h3>
-    </div>
-  </div>
-
-  <!-- Respuestas Detalladas -->
-  <div class="answers-section">
-    <h2>📋 Respuestas Detalladas</h2>
-
-    <div class="answer-card" *ngFor="let answer of submission.answers; let i = index"
-         [ngClass]="{'correct-answer': answer.isCorrect, 'wrong-answer': !answer.isCorrect}">
-      
-      <div class="answer-header">
-        <div class="question-number">
-          <span class="number">{{ i + 1 }}</span>
-          <span class="type-badge">
-            {{ getQuestionIcon(answer.questionType) }} {{ getQuestionTypeLabel(answer.questionType) }}
-          </span>
+    <!-- Información del Estudiante -->
+    <div class="info-section">
+      <div class="info-card student-card">
+        <div class="card-header">
+          <h2>👤 Información del Estudiante</h2>
         </div>
-        <div class="points-badge" [ngClass]="{'earned': answer.isCorrect}">
-          {{ answer.points }} / {{ answer.maxPoints }} pts
+        <div class="card-body">
+          <div class="info-row">
+            <span class="label">Nombre:</span>
+            <span class="value">{{ submission.studentName }}</span>
+          </div>
+          <div class="info-row">
+            <span class="label">Email:</span>
+            <span class="value">{{ submission.studentEmail }}</span>
+          </div>
+          <div class="info-row">
+            <span class="label">ID:</span>
+            <span class="value">{{ submission.studentId }}</span>
+          </div>
         </div>
       </div>
 
-      <div class="question-text">
-        <strong>Pregunta:</strong>
-        <p>{{ answer.questionText }}</p>
-      </div>
-
-      <div class="answer-content">
-        <div class="user-answer">
-          <strong>
-            <span *ngIf="answer.isCorrect">✅</span>
-            <span *ngIf="!answer.isCorrect">❌</span>
-            Respuesta del Estudiante:
-          </strong>
-          <p>{{ answer.userAnswer || '(Sin respuesta)' }}</p>
+      <div class="info-card assessment-card">
+        <div class="card-header">
+          <h2>📝 Información de la Evaluación</h2>
         </div>
-
-        <div class="correct-answer-info" *ngIf="!answer.isCorrect && answer.questionType !== 'essay'">
-          <strong>✓ Respuesta Correcta:</strong>
-          <p>{{ answer.correctAnswer }}</p>
+        <div class="card-body">
+          <div class="info-row">
+            <span class="label">Título:</span>
+            <span class="value">{{ submission.assessmentTitle }}</span>
+          </div>
+          <div class="info-row">
+            <span class="label">Fecha de entrega:</span>
+            <span class="value">{{ submission.submittedAt | date: 'dd/MM/yyyy HH:mm:ss' }}</span>
+          </div>
+          <div class="info-row">
+            <span class="label">Tiempo empleado:</span>
+            <span class="value">⏱️ {{ submission.timeTaken }}</span>
+          </div>
         </div>
       </div>
     </div>
+
+    <!-- Resumen de Calificación -->
+    <div class="score-summary">
+      <div class="score-card main-score" [ngClass]="getStatusClass(submission.percentage)">
+        <div class="score-icon">
+          <span *ngIf="submission.percentage >= 70">🎉</span>
+          <span *ngIf="submission.percentage >= 50 && submission.percentage < 70">😊</span>
+          <span *ngIf="submission.percentage < 50">😔</span>
+        </div>
+        <div class="score-info">
+          <h3>Calificación Final</h3>
+          <div class="score-value">
+            <span class="score">{{ submission.score }}</span>
+            <span class="separator">/</span>
+            <span class="max-score">{{ submission.maxScore }}</span>
+          </div>
+          <div class="percentage">{{ submission.percentage }}%</div>
+          <div class="status-badge" [ngClass]="getStatusClass(submission.percentage)">
+            {{ getStatusLabel(submission.percentage) }}
+          </div>
+        </div>
+      </div>
+
+      <div class="score-card">
+        <div class="stat-icon">✅</div>
+        <div class="stat-value">{{ submission.correct }}</div>
+        <div class="stat-label">Respuestas Correctas</div>
+      </div>
+
+      <div class="score-card">
+        <div class="stat-icon">❌</div>
+        <div class="stat-value">{{ submission.total - submission.correct }}</div>
+        <div class="stat-label">Respuestas Incorrectas</div>
+      </div>
+
+      <div class="score-card">
+        <div class="stat-icon">📊</div>
+        <div class="stat-value">{{ submission.total }}</div>
+        <div class="stat-label">Total de Preguntas</div>
+      </div>
+    </div>
+
+    <!-- Respuestas Detalladas -->
+    <div class="answers-section">
+      <h2>📝 Respuestas Detalladas</h2>
+
+      <div class="answers-list">
+        <div *ngFor="let answer of submission.answers; let i = index" 
+             class="answer-card"
+             [ngClass]="getAnswerStatusClass(answer.isCorrect)">
+          
+          <div class="answer-header">
+            <div class="question-number">
+              <span class="number">Pregunta {{ i + 1 }}</span>
+              <span class="points">{{ answer.points }} / {{ answer.maxPoints }} pts</span>
+            </div>
+            <div class="answer-status">
+              <span class="status-icon">{{ getAnswerStatusIcon(answer.isCorrect) }}</span>
+              <span class="status-text">
+                {{ answer.isCorrect ? 'Correcta' : 'Incorrecta' }}
+              </span>
+            </div>
+          </div>
+
+          <div class="answer-body">
+            <div class="question-text">
+              <strong>Pregunta:</strong>
+              <p>{{ answer.questionText }}</p>
+            </div>
+
+            <div class="question-type">
+              <span class="type-badge">{{ getQuestionTypeLabel(answer.questionType) }}</span>
+            </div>
+
+            <div class="answer-details">
+              <div class="answer-row user-answer" [class.correct]="answer.isCorrect" [class.incorrect]="!answer.isCorrect">
+                <span class="answer-label">Tu respuesta:</span>
+                <span class="answer-value">
+                  {{ answer.userAnswer || '(Sin responder)' }}
+                </span>
+              </div>
+
+              <div class="answer-row correct-answer" *ngIf="!answer.isCorrect && answer.correctAnswer">
+                <span class="answer-label">Respuesta correcta:</span>
+                <span class="answer-value correct">
+                  {{ answer.correctAnswer }}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Botones de Acción -->
+    <div class="actions-footer">
+      <button class="btn-secondary" (click)="goBack()">
+        Volver a Resultados
+      </button>
+      <button class="btn-primary" (click)="printResults()">
+        🖨️ Imprimir Resultados
+      </button>
+    </div>
+
   </div>
-
-  <!-- Comentarios (Opcional para futuro) -->
-  <div class="comments-section">
-    <h3>💬 Comentarios del Profesor</h3>
-    <textarea 
-      placeholder="Agregar comentarios para el estudiante..."
-      rows="4"
-      class="comments-textarea"
-    ></textarea>
-    <button class="btn-save-comments">Guardar Comentarios</button>
-  </div>
-</div>
-
-<!-- Loading -->
-<div class="loading-container" *ngIf="loading">
-  <div class="spinner"></div>
-  <p>Cargando detalles...</p>
-</div>
-
-<!-- No encontrado -->
-<div class="not-found" *ngIf="!loading && !submission">
-  <div class="error-icon">⚠️</div>
-  <h2>No se encontró la evaluación</h2>
-  <button class="btn-back" (click)="goBack()">Volver a Resultados</button>
 </div>

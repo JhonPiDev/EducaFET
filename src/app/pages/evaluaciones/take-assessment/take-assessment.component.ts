@@ -2,7 +2,6 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
-import { AssessmentService } from '../../../services/assessment.service';
 import { Assessment, Question } from '../../../models/assessment.model';
 import { interval, Subscription } from 'rxjs';
 
@@ -14,24 +13,30 @@ import { interval, Subscription } from 'rxjs';
   styleUrl: './take-assessment.component.scss'
 })
 export class TakeAssessmentComponent implements OnInit, OnDestroy {
+
   assessment: Assessment | null = null;
   questions: Question[] = [];
-  answers: { [questionId: string]: string } = {};
   
+  // 🔑 CAMBIO CRÍTICO: Usar índice numérico como clave
+  answers: { [index: number]: string } = {};
+
   loading = true;
   submitting = false;
   showConfirmModal = false;
   showResultModal = false;
-  
+
   timeRemaining = 0;
   startTime = 0;
   timerSubscription?: Subscription;
+
   submissionResult: any = null;
+
+  /** 🔹 Consola (log visual de respuestas) */
+  consoleAnswers: any = {};
 
   constructor(
     private route: ActivatedRoute,
-    private router: Router,
-    private assessmentService: AssessmentService
+    private router: Router
   ) {}
 
   ngOnInit(): void {
@@ -41,11 +46,12 @@ export class TakeAssessmentComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    if (this.timerSubscription) {
-      this.timerSubscription.unsubscribe();
-    }
+    this.timerSubscription?.unsubscribe();
   }
 
+  /** =====================================================
+   *  CARGAR EVALUACIÓN DESDE SESSIONSTORAGE
+   *  ===================================================== */
   loadAssessment(id: string): void {
     this.loading = true;
 
@@ -65,29 +71,16 @@ export class TakeAssessmentComponent implements OnInit, OnDestroy {
       return;
     }
 
-    this.assessment = {
-      id: found.assessment.id,
-      title: found.assessment.title,
-      description: found.assessment.description || "Sin descripción",
-      type: found.assessment.type,
-      course_id: found.assessment.course_id || null,
-      course_name: found.assessment.course_name || "",
-      max_score: found.assessment.max_score || 10,
-      time_limit: found.assessment.time_limit || 10,
-      attempts_allowed: found.assessment.attempts_allowed || 1,
-      questions: found.assessment.questions || [],
-      due_date: found.assessment.due_date || null,
-      status: found.assessment.status || "active",
-      created_at: found.assessment.created_at || new Date().toISOString()
-    };
+    this.assessment = found.assessment;
+    this.questions = this.assessment?.questions || [];
 
-    this.questions = this.assessment.questions || [];
-
-    this.questions.forEach(q => {
-      this.answers[q.id] = '';
+    // Inicializar respuestas vacías usando ÍNDICES
+    this.questions.forEach((q, index) => {
+      this.answers[index] = '';
     });
 
-    if (this.assessment.time_limit) {
+    // Temporizador
+    if (this.assessment?.time_limit) {
       this.timeRemaining = this.assessment.time_limit * 60;
       this.startTimer();
     }
@@ -95,10 +88,13 @@ export class TakeAssessmentComponent implements OnInit, OnDestroy {
     this.loading = false;
   }
 
+  /** =====================================================
+   *  TEMPORIZADOR
+   *  ===================================================== */
   startTimer(): void {
     this.timerSubscription = interval(1000).subscribe(() => {
       this.timeRemaining--;
-      
+
       if (this.timeRemaining <= 0) {
         alert('¡Tiempo agotado! La evaluación se enviará automáticamente.');
         this.confirmSubmit();
@@ -112,14 +108,54 @@ export class TakeAssessmentComponent implements OnInit, OnDestroy {
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   }
 
-  getAnsweredCount(): number {
-    return Object.values(this.answers).filter(a => a && a.trim() !== '').length;
+  /** =====================================================
+   *  CONSOLA DE RESPUESTAS
+   *  ===================================================== */
+  logAnswer(questionId: string, type: string, answer: any, correct: boolean | null = null) {
+    this.consoleAnswers[questionId] = {
+      type,
+      answer,
+      correct
+    };
   }
 
-  getQuestionTypeLabel(type: string): string {
-    return this.assessmentService.getQuestionTypeLabel(type);
+  getConsoleKeys() {
+    return Object.keys(this.consoleAnswers);
   }
 
+  get isConsoleEmpty(): boolean {
+    return Object.keys(this.consoleAnswers).length === 0;
+  }
+
+  /** =====================================================
+   *  MÉTODO PRINCIPAL - USA ÍNDICE
+   *  ===================================================== */
+  setAnswer(questionIndex: number, value: string): void {
+    console.log('🎯 setAnswer llamado:', {
+      questionIndex,
+      value,
+      antes: this.answers[questionIndex]
+    });
+
+    // Guardar usando el índice
+    this.answers[questionIndex] = value;
+
+    console.log('✅ Después de actualizar:', {
+      despues: this.answers[questionIndex],
+      todasRespuestas: {...this.answers}
+    });
+
+    // Log para la consola visual
+    const question = this.questions[questionIndex];
+    if (question) {
+      const correct = question.correct_answer && value === question.correct_answer;
+      this.logAnswer(question.id || questionIndex.toString(), question.question_type, value, !!correct);
+    }
+  }
+
+  /** =====================================================
+   *  ENVÍO DE EVALUACIÓN
+   *  ===================================================== */
   submitAssessment(): void {
     if (this.getAnsweredCount() === 0) {
       alert('Debes responder al menos una pregunta');
@@ -128,70 +164,66 @@ export class TakeAssessmentComponent implements OnInit, OnDestroy {
     this.showConfirmModal = true;
   }
 
+  getAnsweredCount(): number {
+    return Object.values(this.answers).filter(a => a && a.trim() !== '').length;
+  }
+
   confirmSubmit(): void {
     this.showConfirmModal = false;
     this.submitting = true;
-
-    if (this.timerSubscription) {
-      this.timerSubscription.unsubscribe();
-    }
+    this.timerSubscription?.unsubscribe();
 
     setTimeout(() => {
       const totalQuestions = this.questions.length;
       let score = 0;
       let correct = 0;
-
-      // Preparar array de respuestas detalladas
       const detailedAnswers: any[] = [];
 
-      this.questions.forEach((q, i) => {
-        const userAnswer = (this.answers[q.id] || '').trim();
+      // Iterar usando ÍNDICES
+      this.questions.forEach((q, index) => {
+        const userAnswer = (this.answers[index] || '').trim();
         const correctAnswer = (q.correct_answer || '').trim();
         let isCorrect = false;
 
-// MULTIPLE CHOICE
-if (q.question_type === 'multiple_choice') {
-  isCorrect = userAnswer === correctAnswer;
-}
+        if (q.question_type === 'multiple_choice') {
+          isCorrect = userAnswer === correctAnswer;
+        }
 
-// TRUE / FALSE
-if (q.question_type === 'true_false') {
-  isCorrect = userAnswer.toLowerCase() === correctAnswer.toLowerCase();
-}
+        if (q.question_type === 'true_false') {
+          isCorrect = userAnswer.toLowerCase() === correctAnswer.toLowerCase();
+        }
 
-// SHORT ANSWER
-if (q.question_type === 'short_answer') {
-  isCorrect = userAnswer.toLowerCase() === correctAnswer.toLowerCase();
-}
+        if (q.question_type === 'short_answer') {
+          isCorrect = userAnswer.toLowerCase() === correctAnswer.toLowerCase();
+        }
 
-
-        // ESSAY (siempre suma)
         if (q.question_type === 'essay') {
-          isCorrect = true;
+          isCorrect = true; // ensayo siempre 100%
+        }
+
+        if (isCorrect) {
+          correct++;
           score += q.points;
         }
 
-        // Guardar respuesta detallada
         detailedAnswers.push({
-          questionId: q.id,
+          questionId: q.id || `q_${index}`,
+          questionIndex: index,
           questionText: q.question_text,
           questionType: q.question_type,
-          userAnswer: userAnswer,
-          correctAnswer: correctAnswer,
-          isCorrect: isCorrect,
+          userAnswer,
+          correctAnswer,
+          isCorrect,
           points: isCorrect ? q.points : 0,
           maxPoints: q.points
         });
       });
 
-      // Calcular tiempo transcurrido
       const endTime = Date.now();
-      const timeTakenMs = endTime - this.startTime;
-      const timeTakenMinutes = Math.floor(timeTakenMs / 60000);
-      const timeTakenSeconds = Math.floor((timeTakenMs % 60000) / 1000);
-      const timeTakenFormatted = `${timeTakenMinutes}m ${timeTakenSeconds}s`;
+      const timeTaken = endTime - this.startTime;
+      const timeMinutes = Math.floor(timeTaken / 60000);
+      const timeSeconds = Math.floor((timeTaken % 60000) / 1000);
 
-      // Obtener información del estudiante
       const userStr = sessionStorage.getItem('current_user') || sessionStorage.getItem('user');
       let studentInfo = {
         id: 'unknown',
@@ -207,39 +239,46 @@ if (q.question_type === 'short_answer') {
             name: user.name || 'Estudiante',
             email: user.email || 'sin-email@ejemplo.com'
           };
-        } catch (e) {
-          console.error('Error al parsear usuario:', e);
-        }
+        } catch {}
       }
 
-      // Crear objeto de resultado
       const submissionData = {
         assessmentId: this.assessment?.id,
         assessmentTitle: this.assessment?.title,
         studentId: studentInfo.id,
         studentName: studentInfo.name,
         studentEmail: studentInfo.email,
-        score: score,
+        score,
         maxScore: this.assessment?.max_score || 0,
-        percentage: Math.round((score / (this.assessment?.max_score || 1)) * 100),
-        correct: correct,
+        percentage: this.calculatePercentage(correct, totalQuestions),
+        correct,
         total: totalQuestions,
         submittedAt: new Date().toISOString(),
-        timeTaken: timeTakenFormatted,
+        timeTaken: `${timeMinutes}m ${timeSeconds}s`,
         answers: detailedAnswers
       };
 
-      // Guardar en sessionStorage para resultados del profesor
-      this.saveSubmissionToStorage(submissionData);
+      // 🟦 LOG COMPLETO DEL ENVÍO
+      console.log("🟦 ENVÍO DE EVALUACIÓN -> submissionData:", {
+        ...submissionData,
+        answers: submissionData.answers.map(a => ({
+          questionIndex: a.questionIndex,
+          questionId: a.questionId,
+          type: a.questionType,
+          userAnswer: a.userAnswer,
+          correctAnswer: a.correctAnswer,
+          isCorrect: a.isCorrect,
+          points: a.points
+        }))
+      });
 
-      // Marcar evaluación como completada
+      this.saveSubmissionToStorage(submissionData);
       this.markAssessmentAsCompleted(score, submissionData.percentage);
 
-      // Preparar resultado para mostrar al estudiante
       this.submissionResult = {
-        message: "Evaluación enviada exitosamente",
-        score: score,
-        correct: correct,
+        message: 'Evaluación enviada exitosamente',
+        score,
+        correct,
         total: totalQuestions,
         maxScore: this.assessment?.max_score,
         percentage: submissionData.percentage
@@ -248,66 +287,55 @@ if (q.question_type === 'short_answer') {
       this.submitting = false;
       this.showResultModal = true;
 
-    }, 1000);
+    }, 800);
   }
 
-  /**
-   * Guardar resultado en sessionStorage para que el profesor lo vea
-   */
+  /** =====================================================
+   * GUARDAR RESULTADOS EN SESSIONSTORAGE
+   * ===================================================== */
   private saveSubmissionToStorage(submissionData: any): void {
     try {
       const existingRaw = sessionStorage.getItem('assessment_submissions');
-      let submissions = [];
-
-      if (existingRaw) {
-        submissions = JSON.parse(existingRaw);
-      }
-
-      // Agregar nueva submission
+      const submissions = existingRaw ? JSON.parse(existingRaw) : [];
       submissions.push(submissionData);
-
-      // Guardar en sessionStorage
       sessionStorage.setItem('assessment_submissions', JSON.stringify(submissions));
-      
-      console.log('✅ Resultado guardado correctamente:', submissionData);
-    } catch (error) {
-      console.error('❌ Error al guardar resultado:', error);
-      alert('Advertencia: No se pudo guardar el resultado para el profesor.');
+    } catch (err) {
+      console.error('❌ Error guardando resultado:', err);
     }
   }
 
-  /**
-   * Marcar evaluación como completada
-   */
+  /** =====================================================
+   * MARCAR EVALUACIÓN COMO COMPLETADA
+   * ===================================================== */
   private markAssessmentAsCompleted(score: number, percentage: number): void {
     try {
       const raw = sessionStorage.getItem('assessments');
-      if (raw) {
-        let list = JSON.parse(raw);
+      if (!raw) return;
 
-        list = list.map((item: any) => {
-          if (item.assessment?.id == this.assessment?.id) {
-            return {
-              ...item,
-              completed: true,
-              score: score,
-              percentage: percentage,
-              completedAt: new Date().toISOString()
-            };
-          }
-          return item;
-        });
+      let list = JSON.parse(raw);
 
-        sessionStorage.setItem('assessments', JSON.stringify(list));
-        console.log('✅ Evaluación marcada como completada');
-      }
-    } catch (error) {
-      console.error('Error al marcar evaluación como completada:', error);
-    }
+      list = list.map((item: any) => {
+        if (item.assessment?.id == this.assessment?.id) {
+          return {
+            ...item,
+            completed: true,
+            score,
+            percentage,
+            completedAt: new Date().toISOString()
+          };
+        }
+        return item;
+      });
+
+      sessionStorage.setItem('assessments', JSON.stringify(list));
+    } catch {}
   }
 
+  /** =====================================================
+   * ACCIONES
+   * ===================================================== */
   cancelAssessment(): void {
-    if (confirm('¿Estás seguro de que deseas cancelar? Perderás todas tus respuestas.')) {
+    if (confirm('¿Cancelar evaluación? Perderás todas tus respuestas.')) {
       this.router.navigate(['/evaluaciones']);
     }
   }
@@ -316,7 +344,26 @@ if (q.question_type === 'short_answer') {
     this.router.navigate(['/evaluaciones']);
   }
 
-  calculatePercentage(score: number, maxScore: number): number {
-    return this.assessmentService.calculatePercentage(score, maxScore);
+  getQuestionTypeLabel(type: string): string {
+    switch (type) {
+      case 'multiple_choice':
+        return 'Selección Múltiple';
+      case 'true_false':
+        return 'Verdadero / Falso';
+      case 'short_answer':
+        return 'Respuesta Corta';
+      case 'essay':
+        return 'Ensayo';
+      default:
+        return 'Desconocido';
+    }
+  }
+
+  /** =====================================================
+   * CALCULAR PORCENTAJE BASADO EN PREGUNTAS ACERTADAS
+   * ===================================================== */
+  calculatePercentage(correct: number, totalQuestions: number): number {
+    if (totalQuestions <= 0) return 0;
+    return Math.round((correct / totalQuestions) * 100);
   }
 }
